@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Methoden und Grenzen</title>
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+  <!--
+    Methods and limitations page (app_plan.md §10, §11d). DRAFT written by Claude on
+    2026-10-27 from documentation/product_notes_and_limitations.md (L1-L14),
+    method_decision.md and data_and_tests.md; to be reviewed by the user. One page per
+    language later (methods_fr.html etc.).
+  -->
+  <section class="screen text-page">
+    <p><a href="index.html">← Zurück</a></p>
+    <p class="draft-note">Entwurf – Text noch nicht geprüft.</p>
+    <h1>Methoden und Grenzen</h1>
+
+    <h2>Die Frage</h2>
+    <p>Wo auf der Welt wäre ein Sommer, wie du ihn 2026 an deinem Ort in der Schweiz erlebt hast,
+    heute ein gewöhnlicher Sommer? Wir vergleichen dazu den beobachteten Sommer 2026 (Juni bis August)
+    jedes Ortes der Schweiz mit den Sommern 1991–2020 aller Landgebiete ausserhalb der Tropen.
+    Wir verwenden nur Beobachtungsdaten, keine Klimamodelle oder Szenarien.</p>
+
+    <h2>Daten</h2>
+    <ul>
+      <li><b>Dein Ort:</b> Gitterdaten von MeteoSchweiz (Monatsmittel der Temperatur und Monatssummen
+      des Niederschlags, 1 × 1 km). Jeder Ort steht für das 1-km-Feld, in dem er liegt. Die Werte für 2026
+      stammen aus den vorläufigen Monatsdaten; wir rechnen neu, sobald das definitive Archiv vorliegt
+      (Februar 2027).</li>
+      <li><b>Analogorte weltweit:</b> CHELSA, Version 2.1 (monatliche Klimadaten, rund 1 × 1 km;
+      Karger et al. 2017), Sommer 1991–2020. In der Südhemisphäre zählt Dezember bis Februar als Sommer.</li>
+      <li><b>Analogorte in der Schweiz und knapp jenseits der Grenze:</b> wieder die Daten von MeteoSchweiz,
+      weil CHELSA im Schweizer Flachland etwa 0,7 °C zu warm ist; am Rand dieses Gebiets gehen die beiden
+      Datensätze über 5 km fliessend ineinander über.</li>
+    </ul>
+
+    <h2>Wie wir die Analogorte finden</h2>
+    <p>Wir betrachten zwei Grössen: die mittlere Temperatur und den Niederschlag von Juni bis August.
+    Ein 1-km-Feld zählt als Analogort, wenn dein Sommer 2026 dort ein gewöhnlicher Sommer wäre:
+    Temperatur und Niederschlag liegen beide in der mittleren Hälfte der dortigen Sommer 1991–2020,
+    und auch die Kombination der beiden ist dort nicht ungewöhnlich (für Fachleute: Mahalanobis-Distanz,
+    umgerechnet in eine «Sigma»-Unähnlichkeit kleiner als 0,674, nach King et al. 2024).
+    Zusammenhängende Gebiete kleiner als 25 km² lassen wir weg. Benannt werden die Gebiete nach Regionen
+    (Kantone, Bundesstaaten, Provinzen; Natural Earth).</p>
+    <p>Damit die Rechnung machbar bleibt, haben wir die rund 47 000 Felder der Schweiz in Gruppen mit fast
+    gleichem Sommer 2026 zusammengefasst (Temperatur auf 0,1 °C, Niederschlag auf etwa 3 % genau).</p>
+
+    <h2>Die Strassenbilder</h2>
+    <p>Die Bilder sind zufällig gewählte Google-Street-View-Aufnahmen aus den Analoggebieten deines Ortes:
+    nur offizielle Aufnahmen von Google, nur aus dem dortigen Sommer (Juni bis September, auf der
+    Südhalbkugel Dezember bis März), nur auf Land, das nicht überbaut ist (Wald, Busch, Grasland, Acker;
+    ESA WorldCover). Jede Runde zeigt eine andere Region. Die Landschaften auf den Bildern sind von
+    Jahrzehnten Klima, Boden und Nutzung geprägt, nicht von einem einzelnen Sommer. In China gibt es keine
+    Street-View-Bilder; Gebiete dort erscheinen nur auf der Karte.</p>
+
+    <h2>Weitere Zahlen</h2>
+    <ul>
+      <li><b>Normal</b> heisst immer: Mittel der Sommer 1991–2020.</li>
+      <li><b>Niederschlag:</b> Regenmesser fangen besonders im Gebirge nicht allen Niederschlag auf.
+      CHELSA ist dafür korrigiert; damit die beiden Datensätze vergleichbar sind, korrigieren wir die Werte
+      von MeteoSchweiz ebenso (etwa +5 % im Flachland bis +35 % auf 2500 m). Die Millimeter können darum
+      von den Angaben von MeteoSchweiz abweichen; der Anteil am Normalwert (in %) ist gleich.</li>
+      <li><b>Hitzetage</b> (mindestens 30 °C) zeigen wir nur zur Information; die Suche nach Analogorten
+      verwendet sie nicht. Sie schwanken stark über kurze Distanzen, und an vielen Orten gibt es in den
+      meisten Sommern keine.</li>
+      <li><b>Hitze-Trockenheitsindikator (Balkengrafik):</b> Für jeden Sommer 1961–2026 werden Temperatur und
+      Niederschlag mit den Sommern 1991–2020 desselben Ortes verglichen (in Standardabweichungen), gleich
+      gewichtet addiert und nochmals standardisiert. Hohe Werte bedeuten heiss und niederschlagsarm.
+      Der Indikator ist relativ zum eigenen Normal jedes Ortes; gegenläufige Abweichungen gleichen sich aus;
+      er misst weder Bodenfeuchte noch Schäden und ist keine Wiederkehrperiode. Die Farben sättigen jenseits
+      von ±2,5, die Balkenhöhen zeigen die vollen Werte. Historische Ränge beziehen sich auf die Gitterdaten
+      von MeteoSchweiz (TabsM, RhiresM); mögliche Einflüsse von Veränderungen des Messnetzes wurden nicht
+      quantifiziert.</li>
+    </ul>
+
+    <h2>Grenzen</h2>
+    <ul>
+      <li><b>Ein Sommer, kein Klima:</b> Die Analoggebiete zeigen, wo ein Sommer wie 2026 heute gewöhnlich ist.
+      Das ist nicht «dein Klima der Zukunft»; die Erwärmung kann über 2026 hinausgehen.</li>
+      <li><b>Stadt und Land:</b> Die Gitterdaten beschreiben das regionale Klima ausserhalb der Städte. In einem
+      Stadtzentrum war der Sommer wahrscheinlich noch heisser.</li>
+      <li><b>Gebirge:</b> Über etwa 1500 m beruhen die Werte auf wenigen Messstationen. Auf Gipfeln und Graten
+      gibt es oft nur sehr kleine Analoggebiete, die wegen der 25-km²-Regel wegfallen; für solche Orte zeigen
+      wir weit entfernte oder gar keine Gebiete und keine Bilder.</li>
+      <li><b>CHELSA ist nicht überall gleich gut:</b> Im trockenen Westen der USA (z. B. Utah, Nevada) weichen die
+      Daten deutlich von Messstationen ab; Analoggebiete dort sind unsicherer. Ausserhalb Europas konnten wir
+      CHELSA nur an wenigen Stationen prüfen. Drei fehlerhafte Niederschlagsmonate von CHELSA (Juni und August
+      2015, Februar 2016) haben wir weggelassen.</li>
+      <li><b>Wirkung nicht untersucht:</b> Wie solche Vergleiche auf die Wahrnehmung des Klimawandels wirken,
+      haben wir nicht untersucht.</li>
+    </ul>
+
+    <h2>Quellen und Lizenzen</h2>
+    <ul class="small-list">
+      <li>Klimadaten Schweiz: MeteoSchweiz (Open Government Data).</li>
+      <li>Klimadaten weltweit: Karger, D. N. et al. (2017): Climatologies at high resolution for the earth's land
+      surface areas. Scientific Data 4, 170122. CHELSA V2.1, CC0.</li>
+      <li>Methode der Sigma-Unähnlichkeit: King, A. D. et al. (2024) und Mahony, C. R. et al. (2017).</li>
+      <li>Landbedeckung: © ESA WorldCover project 2021 / Contains modified Copernicus Sentinel data (2021)
+      processed by ESA WorldCover consortium (CC BY 4.0).</li>
+      <li>Regionen und Länder: Natural Earth (gemeinfrei).</li>
+      <li>Karte der Schweiz und Ortssuche: ©swisstopo.</li>
+      <li>Strassenbilder und Weltkarten: Google.</li>
+      <li>Kartenbibliothek: Leaflet (BSD-Lizenz).</li>
+    </ul>
+  </section>
+</body>
+</html>

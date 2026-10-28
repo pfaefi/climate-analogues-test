@@ -1,0 +1,45 @@
+# GitHub Actions workflow of the public test site (copied by scripts/33_test_site.R to
+# .github/workflows/deploy.yml in the test-site repository; app_plan.md §12).
+# On every push to main: writes config.local.js with the Google browser key from the
+# repository secret GOOGLE_MAPS_JS_KEY (so the key is never in a commit) and publishes the
+# folder with GitHub Pages (Settings → Pages → Source: "GitHub Actions").
+
+name: Deploy test site
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Write the Google browser key
+        env:
+          KEY: ${{ secrets.GOOGLE_MAPS_JS_KEY }}
+        run: |
+          echo "window.LOCAL_CONFIG = { googleMapsKey: \"$KEY\" };" > config.local.js
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+      - id: deployment
+        uses: actions/deploy-pages@v4

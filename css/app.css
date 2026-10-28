@@ -1,0 +1,341 @@
+/* Layout of the app: phone first (app_plan.md §10), wider screens get more room. */
+
+:root {
+  --text: #1f1f1f;
+  --muted: #5c5c5c;
+  --background: #fbfaf8;
+  --card: #ffffff;
+  --border: #e2ded8;
+  --accent: #c2410c;          /* warm orange, as the analogue layer on the maps */
+  --accent-dark: #7a1f00;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 17px;
+  line-height: 1.45;
+  color: var(--text);
+  background: var(--background);
+}
+
+.screen {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+h1 { font-size: 1.7rem; line-height: 1.2; margin: 8px 0 12px; }
+h2 { font-size: 1.35rem; margin: 8px 0 12px; }
+.intro p { margin: 0 0 10px; }
+.intro .how { color: var(--muted); font-size: 0.95rem; }
+
+/* Search field with suggestions */
+.search { position: relative; margin-top: 18px; }
+.search label { display: block; font-weight: 600; margin-bottom: 6px; }
+.search input {
+  width: 100%;
+  font-size: 1.05rem;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card);
+}
+.search input:focus { outline: 2px solid var(--accent); border-color: transparent; }
+.search-results {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 0;
+  position: absolute;
+  left: 0; right: 0;
+  z-index: 2000;              /* above the map and its zoom buttons (z-index 1000) */
+  background: var(--card);
+  border-radius: 10px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+}
+.search-results:empty { display: none; }
+.search-results button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  padding: 12px 14px;       /* large enough for a finger */
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  background: none;
+  cursor: pointer;
+}
+.search-results button:hover, .search-results button:focus { background: #fdf0e8; }
+.search-empty { padding: 12px 14px; color: var(--muted); }
+.search-kind { display: block; color: var(--muted); font-size: 0.8rem; }
+
+/* Map */
+.map-hint { margin: 10px 0 6px; color: var(--muted); font-size: 0.95rem; }
+.start-map {
+  height: 52vh;
+  min-height: 280px;
+  max-height: 520px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+/* Card of the chosen place */
+.chosen-card {
+  margin-top: 14px;
+  padding: 16px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.chosen-label { margin: 0; color: var(--muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.04em; }
+.chosen-name { margin: 2px 0 2px; font-size: 1.3rem; font-weight: 700; }
+.chosen-cell { margin: 0 0 10px; color: var(--muted); font-size: 0.9rem; }
+.chosen-message { margin: 0 0 12px; }
+.chosen-hint { margin: -6px 0 12px; color: var(--muted); font-size: 0.85rem; }
+
+button.primary, .skip-link.as-button {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  font: inherit;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fff;
+  background: var(--accent);
+  border: 0;
+  border-radius: 10px;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+}
+button.primary:hover, .skip-link.as-button:hover { background: var(--accent-dark); }
+.skip-link {
+  display: block;
+  margin-top: 12px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+[hidden] { display: none !important; }
+
+button.back-to-start {
+  font: inherit;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card);
+  cursor: pointer;
+}
+
+/* Footer with the links to the other pages */
+.page-footer {
+  margin-top: 28px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  font-size: 0.95rem;
+}
+.page-footer a { display: inline-block; margin: 0 18px 8px 0; color: var(--accent-dark); }
+.credits { color: var(--muted); font-size: 0.8rem; margin: 6px 0 0; }
+
+/* Wider screens: a little more room */
+@media (min-width: 760px) {
+  .screen { padding: 28px 24px; }
+  h1 { font-size: 2.1rem; }
+}
+
+
+/* Text pages (information, methods) */
+.text-page h2 { margin-top: 26px; }
+.text-page li { margin-bottom: 8px; }
+.text-page .small-list { font-size: 0.85rem; color: var(--muted); }
+.draft-note {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: #fff3cd;
+  color: #7a5a00;
+  font-size: 0.85rem;
+}
+
+
+/* ---------------------------------------------------------------------------------
+   Results screen
+   --------------------------------------------------------------------------------- */
+
+.results-kicker { margin: 8px 0 0; color: var(--muted); font-size: 0.95rem; }
+.screen-results h1 { margin-top: 0; }
+.screen-results h2 { margin-top: 28px; }
+
+/* Headline numbers: one under the other on phones, side by side on wider screens */
+.results-numbers { display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 10px; }
+.number {
+  padding: 12px 14px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-left: 5px solid var(--accent);
+  border-radius: 10px;
+}
+.number-value { display: block; font-size: 1.8rem; font-weight: 800; line-height: 1.1; }
+.number-label { display: block; color: var(--muted); font-size: 0.9rem; }
+.numbers-note { color: var(--muted); font-size: 0.8rem; margin: 8px 0 0; }
+.results-score { font-size: 1.1rem; font-weight: 700; margin: 16px 0 0; }
+
+.results-map {
+  height: 58vh;
+  min-height: 300px;
+  max-height: 560px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+.map-legend { font-size: 0.85rem; color: var(--muted); margin: 8px 0 0; line-height: 1.9; }
+.map-legend .swatch, .map-legend .dot {
+  display: inline-block; width: 14px; height: 14px; margin: 0 4px -2px 10px; border-radius: 3px;
+}
+.map-legend .swatch:first-child { margin-left: 0; }
+.map-legend .dot { border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px #bbb; }
+.results-nearest { margin: 10px 0 0; }
+
+/* Stripes graphic (SVG from js/stripes.js) */
+.stripes-subtitle { color: var(--muted); font-size: 0.9rem; margin: -6px 0 6px; }
+.stripes-svg { width: 100%; height: auto; display: block; }
+.stripes-grid { stroke: #e6e1da; stroke-width: 1; }
+.stripes-zero { stroke: #8a857e; stroke-width: 1; }
+.stripes-tick, .stripes-year, .stripes-legend { font-size: 12px; fill: #5c5c5c; }
+.stripes-tick.end, .stripes-legend.end { text-anchor: end; }
+.stripes-year { text-anchor: middle; }
+.stripes-year.last { font-weight: 700; fill: var(--text); }
+.stripes-caption { color: var(--muted); font-size: 0.8rem; margin: 6px 0 0; }
+
+.results-explain p { margin: 0 0 10px; }
+#play-again { margin: 22px 0 12px; }
+
+@media (min-width: 760px) {
+  .results-numbers { grid-template-columns: repeat(3, 1fr); }
+}
+
+
+/* ---------------------------------------------------------------------------------
+   Play screen: fills the whole window. Phones: Street View over the full screen, the
+   guess map is a panel that slides up from below. Wide screens: see the end of the file.
+   --------------------------------------------------------------------------------- */
+
+body.playing { overflow: hidden; }
+
+.screen-play {
+  position: fixed;
+  inset: 0;
+  max-width: none;
+  padding: 0;
+  background: #222;
+}
+
+.play-bar {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 48px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 12px;
+  color: #fff;
+  background: rgba(30, 30, 30, 0.85);
+  font-weight: 600;
+}
+.play-bar #play-score { margin-left: auto; }
+.play-exit {
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: #fff;
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 8px;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.play-loading {
+  position: absolute;
+  top: 45%; left: 0; right: 0;
+  text-align: center;
+  color: #fff;
+  z-index: 5;
+}
+
+.street-view {
+  position: absolute;
+  top: 48px; left: 0; right: 0; bottom: 0;
+}
+
+/* Button that opens the guess map (phones) */
+.guess-open {
+  position: absolute;
+  left: 12px; right: 12px; bottom: 16px;
+  width: auto !important;
+  z-index: 10;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+}
+
+/* Guess map panel: hidden below the screen until opened */
+.guess-panel {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 70%;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  background: var(--card);
+  border-radius: 14px 14px 0 0;
+  box-shadow: 0 -4px 18px rgba(0, 0, 0, 0.3);
+  transform: translateY(105%);
+  transition: transform 0.25s ease;
+}
+.guess-panel.open { transform: translateY(0); }
+.guess-map { flex: 1; border-radius: 14px 14px 0 0; }
+.guess-actions { display: flex; gap: 10px; padding: 10px 12px 14px; }
+.guess-actions .primary { flex: 2; }
+.guess-actions .primary:disabled { background: #b9b2aa; cursor: default; }
+.guess-close {
+  flex: 1;
+  font: inherit;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card);
+  cursor: pointer;
+}
+
+/* Result of a round: map above, text below, over the whole play screen */
+.reveal-panel {
+  position: absolute;
+  top: 48px; left: 0; right: 0; bottom: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  background: var(--card);
+}
+.reveal-map { flex: 1; min-height: 45%; }
+.reveal-text { padding: 14px 16px 18px; }
+.reveal-text p { margin: 0 0 10px; }
+.reveal-distance { font-size: 1.2rem; font-weight: 700; }
+
+/* Wide screens (computer): the guess map stays small in the lower right corner, as in
+   the prototype, and grows while the mouse is over it; no open / close buttons. */
+@media (min-width: 900px) {
+  .guess-open, .guess-close { display: none; }
+  .guess-panel, .guess-panel.open {
+    left: auto; right: 16px; bottom: 16px;
+    width: 380px; height: 300px;
+    border-radius: 12px;
+    transform: none;
+    transition: width 0.2s ease, height 0.2s ease;
+  }
+  .guess-panel:hover { width: 640px; height: 480px; }
+  .guess-map { border-radius: 12px 12px 0 0; }
+  .reveal-panel { flex-direction: row; }
+  .reveal-map { min-height: 0; }
+  .reveal-text { width: 380px; padding: 24px; }
+}
