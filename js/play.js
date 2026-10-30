@@ -362,6 +362,7 @@ function showLoading(loading) {
 // shown (the CSS decides; the class only matters on narrow screens).
 function openGuessPanel(open) {
   document.getElementById("guess-panel").classList.toggle("open", open);
+  document.getElementById("guess-backdrop").hidden = !open;   // a tap on the image closes the map
   // Google maps need to be told when their box changed size.
   if (open && guessMap !== null) google.maps.event.trigger(guessMap, "resize");
 }
@@ -370,6 +371,7 @@ function setUpButtons() {
   buttonsReady = true;
   document.getElementById("guess-open").addEventListener("click", () => openGuessPanel(true));
   document.getElementById("guess-close").addEventListener("click", () => openGuessPanel(false));
+  document.getElementById("guess-backdrop").addEventListener("click", () => openGuessPanel(false));
   document.getElementById("guess-button").addEventListener("click", confirmGuess);
   document.getElementById("next-button").addEventListener("click", nextRound);
 }

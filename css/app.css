@@ -392,6 +392,15 @@ button.play-exit {             /* "button." so that it wins over button.back-to-
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
 }
 
+/* Phones: a transparent layer over the visible part of the image while the guess map is
+   open; a tap on it closes the map (user, 2026-10-30). Not on wide screens (map always shown). */
+.guess-backdrop {
+  position: absolute;
+  top: 48px; left: 0; right: 0; bottom: 0;
+  z-index: 15;                   /* above Street View and «Wo bist du?», below the map panel */
+  cursor: pointer;
+}
+
 /* Guess map panel: hidden below the screen until opened */
 .guess-panel {
   position: absolute;
@@ -449,7 +458,7 @@ button.play-exit {             /* "button." so that it wins over button.back-to-
 /* Wide screens (computer): the guess map stays small in the lower right corner, as in
    the prototype, and grows while the mouse is over it; no open / close buttons. */
 @media (min-width: 900px) {
-  .guess-open, .guess-close { display: none; }
+  .guess-open, .guess-close, .guess-backdrop { display: none; }
   .guess-panel, .guess-panel.open {
     left: auto; right: 16px; bottom: 16px;
     width: 380px; height: 300px;
