@@ -41,7 +41,17 @@ h2 { font-size: 1.35rem; margin: 8px 0 12px; }
   font-display: swap;
   src: url("../lib/bricolage-grotesque/BricolageGrotesque-ExtraBold-latin.woff2") format("woff2");
 }
-.stripes-band { height: 12px; }
+/* The band stays on top of the window while the page scrolls (user, 2026-10-30); the title
+   scrolls away with the page. --band-height leaves room for the band above the title. The
+   band lies above the maps (Leaflet and Google use z-index up to about 1000). */
+:root { --band-height: 12px; }
+.stripes-band {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: var(--band-height);
+  z-index: 2000;
+}
+.site-header { padding-top: var(--band-height); }
 .site-title {
   max-width: 760px;
   margin: 0 auto;
@@ -69,7 +79,7 @@ h2 { font-size: 1.35rem; margin: 8px 0 12px; }
 }
 /* Play screen: only a thin band; the game below it fills the rest of the window. */
 body.playing .site-title { display: none; }
-body.playing .stripes-band { position: fixed; top: 0; left: 0; right: 0; height: 5px; z-index: 20; }
+body.playing .stripes-band { height: 5px; }
 body.playing .screen-play { top: 5px; }
 .intro p { margin: 0 0 10px; }
 .intro .how { color: var(--muted); font-size: 0.95rem; }
@@ -194,7 +204,7 @@ button.back-to-start {
 @media (min-width: 760px) {
   .screen { padding: 28px 24px; }
   h1 { font-size: 2.1rem; }
-  .stripes-band { height: 16px; }
+  :root { --band-height: 16px; }
 }
 
 
@@ -247,6 +257,7 @@ button.back-to-start {
 .results-map.enlarged {
   position: fixed !important;
   inset: 0;
+  top: var(--band-height);          /* below the stripe band, which stays on top */
   z-index: 1000;
   height: auto;
   max-height: none;
@@ -266,8 +277,11 @@ body.map-enlarged { overflow: hidden; }
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
   cursor: pointer;
 }
-.map-legend { font-size: 0.85rem; color: var(--muted); margin: -4px 0 8px; line-height: 1.9; }
-.map-legend .pin { display: inline-block; width: 14px; height: 20px; margin: 0 4px -5px 10px; }
+/* Legend above the results map: as compact as the small text below the map (user, 2026-10-30;
+   line height 1.9 before). The pin is a bit smaller so that it does not widen its line. */
+.map-legend { font-size: 0.85rem; color: var(--muted); margin: -4px 0 8px; line-height: 1.45; }
+.map-legend .pin { display: inline-block; width: 11px; height: 16px; margin: 0 3px -3px 10px; }
+#legend-dots .small-area { margin-left: 0; }     /* first item of the line when zoomed out */
 .map-legend .small-area {
   display: inline-block; width: 10px; height: 10px; margin: 0 4px -1px 10px; border-radius: 50%;
   background: #f16913; border: 2px solid #7a1f00;
@@ -331,6 +345,7 @@ body.playing { overflow: hidden; }
   font-weight: 600;
 }
 .play-bar #play-score { margin-left: auto; }
+.play-bar span { white-space: nowrap; }    /* «Runde 1 von 5» on one line, also with large system fonts */
 button.play-exit {             /* "button." so that it wins over button.back-to-start (white) */
   font: inherit;
   font-size: 0.85rem;
@@ -402,9 +417,20 @@ button.play-exit {             /* "button." so that it wins over button.back-to-
   flex-direction: column;
   background: var(--card);
 }
-.reveal-map { flex: 1; min-height: 45%; }
-.reveal-text { padding: 14px 16px 18px; }
+/* On phones the text below the map can be longer than the room left (large system fonts,
+   the climate sentence): the text part scrolls by itself, and «Nächste Runde» stays visible
+   at its lower edge (user's test 2026-10-30: the page could not be scrolled, the button was
+   out of reach). */
+.reveal-map { flex: 1 1 auto; min-height: 35%; }
+.reveal-text { flex: 0 1 auto; min-height: 0; overflow-y: auto; padding: 14px 16px 0; }
 .reveal-text p { margin: 0 0 10px; }
+.reveal-text #next-button {
+  position: sticky;
+  bottom: 0;
+  margin: 4px 0 0;
+  box-shadow: 0 -10px 10px var(--card);    /* the text scrolls under the button, not through it */
+}
+.reveal-text::after { content: ""; display: block; height: 16px; }   /* room below the button */
 .reveal-distance { font-size: 1.2rem; font-weight: 700; }
 .reveal-climate { line-height: 1.4; }
 

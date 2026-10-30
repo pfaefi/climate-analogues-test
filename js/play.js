@@ -128,11 +128,12 @@ function weightedPick(items) {
 function makeMaps() {
   if (streetView !== null) return;
   // Street View: look around only (no walking to the next village sign), no address,
-  // no road names (app_plan.md §7).
+  // no road names (app_plan.md §7). No zoom buttons: zooming works with two fingers or the
+  // mouse wheel, and on phones the buttons lay under «Wo bist du?» (user's test 2026-10-30).
   streetView = new google.maps.StreetViewPanorama(document.getElementById("street-view"), {
     addressControl: false, showRoadLabels: false, linksControl: false, clickToGo: false,
     fullscreenControl: false, motionTracking: false, motionTrackingControl: false,
-    enableCloseButton: false, panControl: false
+    enableCloseButton: false, panControl: false, zoomControl: false
   });
   guessMap = new google.maps.Map(document.getElementById("guess-map"), {
     center: { lat: 30, lng: 10 }, zoom: 1, minZoom: 1, streetViewControl: false,

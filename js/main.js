@@ -25,6 +25,16 @@ function showScreen(name) {
   if (name === "start") refreshStartMap();
 }
 
+// «Anderen Ort wählen» and «Abbrechen»: back to the start screen, but scrolled down to the
+// search field and the map, past the introduction that the player has already read
+// (user, 2026-10-30).
+function backToSearch() {
+  showScreen("start");
+  const search = document.querySelector("#screen-start .search");
+  const band = document.getElementById("stripes-band").offsetHeight;   // stays on top of the window
+  window.scrollTo(0, search.getBoundingClientRect().top + window.scrollY - band - 12);
+}
+
 // «Spielen»: optional survey question, then the five rounds, then the results.
 async function startGame(place) {
   currentPlace = place;
@@ -52,7 +62,7 @@ async function main() {
   drawBanner();
   initStart(startGame, place => showResults(place));
   for (const button of document.querySelectorAll(".back-to-start")) {
-    button.addEventListener("click", () => showScreen("start"));
+    button.addEventListener("click", backToSearch);
   }
   document.getElementById("play-again").addEventListener("click", () => startGame(currentPlace));
   initPages(showScreen, () => currentScreen);
