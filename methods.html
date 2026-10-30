@@ -20,8 +20,8 @@
     <h1>Methoden und Grenzen</h1>
 
     <h2>Die Frage</h2>
-    <p>Wo auf der Welt wäre ein Sommer, wie du ihn 2026 an deinem Ort in der Schweiz erlebt hast,
-    heute ein gewöhnlicher Sommer? Wir vergleichen dazu den beobachteten Sommer 2026 (Juni bis August)
+    <p>Wo auf der Welt gehört ein Sommer, wie du ihn 2026 an deinem Ort in der Schweiz erlebt hast,
+    heute zum Alltag? Wir vergleichen dazu den beobachteten Sommer 2026 (Juni bis August)
     jedes Ortes der Schweiz mit den Sommern 1991–2020 aller Landgebiete ausserhalb der Tropen.
     Wir verwenden nur Beobachtungsdaten, keine Klimamodelle oder Szenarien.</p>
 
@@ -40,7 +40,7 @@
 
     <h2>Wie wir die Analogorte finden</h2>
     <p>Wir betrachten zwei Grössen: die mittlere Temperatur und den Niederschlag von Juni bis August.
-    Ein 1-km-Feld zählt als Analogort, wenn dein Sommer 2026 dort ein gewöhnlicher Sommer wäre:
+    Ein 1-km-Feld zählt als Analogort, wenn dein Sommer 2026 dort ein typischer Sommer ist:
     Temperatur und Niederschlag liegen beide in der mittleren Hälfte der dortigen Sommer 1991–2020,
     und auch die Kombination der beiden ist dort nicht ungewöhnlich (für Fachleute: Mahalanobis-Distanz,
     umgerechnet in eine «Sigma»-Unähnlichkeit kleiner als 0,674, nach King et al. 2024).
@@ -56,6 +56,16 @@
     ESA WorldCover). Jede Runde zeigt eine andere Region. Die Landschaften auf den Bildern sind von
     Jahrzehnten Klima, Boden und Nutzung geprägt, nicht von einem einzelnen Sommer. In China gibt es keine
     Street-View-Bilder; Gebiete dort erscheinen nur auf der Karte.</p>
+
+    <h2>Die Punkte</h2>
+    <p>Pro Runde gibt es bis zu 5000 Punkte für den Ort: 5000 × e<sup>−Distanz / 2000 km</sup>.
+    Dazu kommen bis zu 5000 Klimapunkte: die vollen Punkte, wenn dein Tipp in einem der eingezeichneten
+    Gebiete liegt (in der Schweiz und rundherum auf 1 km genau, sonst in Blöcken von etwa 8 km, von denen
+    mindestens ein Drittel zum Gebiet gehört); sonst weniger, je ungewöhnlicher dein Sommer 2026 unter den normalen Sommern
+    1991–2020 am getippten Ort wäre (dieselbe Sigma-Unähnlichkeit wie oben, auf einem Raster von etwa
+    8 km, auch in den Tropen): 5000 × e<sup>−(Sigma − 0,674)</sup>. Im Meer gibt es keine Klimapunkte; ein Tipp bis etwa 15 km neben der Küste zählt für das nächste Landfeld.
+    Für den Vergleich nach jeder Runde nehmen wir die mittlere Temperatur und den mittleren Niederschlag
+    der Sommer 1991–2020 am getippten Ort (CHELSA). Den Rekord speichert nur dein Browser.</p>
 
     <h2>Weitere Zahlen</h2>
     <ul>
@@ -79,10 +89,11 @@
 
     <h2>Grenzen</h2>
     <ul>
-      <li><b>Ein Sommer, kein Klima:</b> Die Analoggebiete zeigen, wo ein Sommer wie 2026 heute gewöhnlich ist.
+      <li><b>Ein Sommer, kein Klima:</b> Die Analoggebiete zeigen, wo ein Sommer wie 2026 heute zum Alltag gehört.
       Das ist nicht «dein Klima der Zukunft»; die Erwärmung kann über 2026 hinausgehen.</li>
       <li><b>Stadt und Land:</b> Die Gitterdaten beschreiben das regionale Klima ausserhalb der Städte. In einem
-      Stadtzentrum war der Sommer wahrscheinlich noch heisser.</li>
+      Stadtzentrum war der Sommer wahrscheinlich noch heisser, besonders in der Nacht. Wenn mindestens die Hälfte
+      des 1-km-Feldes überbaut ist (ESA WorldCover), weist die App darauf hin.</li>
       <li><b>Gebirge:</b> Über etwa 1500 m beruhen die Werte auf wenigen Messstationen. Auf Gipfeln und Graten
       gibt es oft nur sehr kleine Analoggebiete, die wegen der 25-km²-Regel wegfallen; für solche Orte zeigen
       wir weit entfernte oder gar keine Gebiete und keine Bilder.</li>

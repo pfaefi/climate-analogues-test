@@ -29,6 +29,48 @@ body {
 
 h1 { font-size: 1.7rem; line-height: 1.2; margin: 8px 0 12px; }
 h2 { font-size: 1.35rem; margin: 8px 0 12px; }
+/* Banner on every screen (app_plan.md §17): the summers of Switzerland 1961-2026 as stripes
+   over the whole width, below it the name of the app in a stripe gradient from cool and wet
+   (petrol) to hot and dry (dark magenta): the colours of the results graphic without the
+   palest classes, which would make letters vanish. Font: Bricolage Grotesque (SIL Open Font
+   License 1.1, lib/bricolage-grotesque/; served from here, not from Google Fonts). */
+@font-face {
+  font-family: "Bricolage Grotesque";
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url("../lib/bricolage-grotesque/BricolageGrotesque-ExtraBold-latin.woff2") format("woff2");
+}
+.stripes-band { height: 12px; }
+.site-title {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 12px 16px 0;
+}
+.site-title span {
+  display: inline-block;
+  font-family: "Bricolage Grotesque", system-ui, sans-serif;
+  font-weight: 800;
+  font-size: clamp(1.5rem, 8vw, 3rem);    /* one line also on phones (two lines would each get the gradient) */
+  white-space: nowrap;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  color: var(--accent-dark);              /* if the browser cannot fill text with an image */
+}
+@supports ((-webkit-background-clip: text) or (background-clip: text)) {
+  .site-title span {
+    color: transparent;
+    -webkit-background-clip: text;
+    background-clip: text;
+    background-image: linear-gradient(90deg,
+      #003F4A 0% 10%, #005F6B 10% 20%, #00808A 20% 30%, #2A9FA6 30% 40%, #66BCC0 40% 50%,
+      #D376B1 50% 60%, #BE4A96 60% 70%, #9C2A7B 70% 80%, #73145E 80% 90%, #4A0640 90% 100%);
+  }
+}
+/* Play screen: only a thin band; the game below it fills the rest of the window. */
+body.playing .site-title { display: none; }
+body.playing .stripes-band { position: fixed; top: 0; left: 0; right: 0; height: 5px; z-index: 20; }
+body.playing .screen-play { top: 5px; }
 .intro p { margin: 0 0 10px; }
 .intro .how { color: var(--muted); font-size: 0.95rem; }
 
@@ -95,6 +137,14 @@ h2 { font-size: 1.35rem; margin: 8px 0 12px; }
 .chosen-cell { margin: 0 0 10px; color: var(--muted); font-size: 0.9rem; }
 .chosen-message { margin: 0 0 12px; }
 .chosen-hint { margin: -6px 0 12px; color: var(--muted); font-size: 0.85rem; }
+.urban-note {                 /* note on the urban heat island (app_plan.md §13) */
+  margin: 0 0 12px;
+  padding: 8px 12px;
+  border-left: 4px solid var(--accent);
+  background: #fdf0e8;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
 
 button.primary, .skip-link.as-button {
   display: block;
@@ -144,6 +194,7 @@ button.back-to-start {
 @media (min-width: 760px) {
   .screen { padding: 28px 24px; }
   h1 { font-size: 2.1rem; }
+  .stripes-band { height: 16px; }
 }
 
 
@@ -182,6 +233,7 @@ button.back-to-start {
 .number-label { display: block; color: var(--muted); font-size: 0.9rem; }
 .numbers-note { color: var(--muted); font-size: 0.8rem; margin: 8px 0 0; }
 .results-score { font-size: 1.1rem; font-weight: 700; margin: 16px 0 0; }
+.results-record { color: var(--muted); margin: 4px 0 0; }
 
 .results-map {
   height: 58vh;
@@ -190,13 +242,46 @@ button.back-to-start {
   border-radius: 12px;
   border: 1px solid var(--border);
 }
-.map-legend { font-size: 0.85rem; color: var(--muted); margin: 8px 0 0; line-height: 1.9; }
+/* «Karte vergrössern»: the map box fills the window (no browser full screen, see results.js).
+   !important because Google sets position: relative inline on the map box. */
+.results-map.enlarged {
+  position: fixed !important;
+  inset: 0;
+  z-index: 1000;
+  height: auto;
+  max-height: none;
+  border-radius: 0;
+  border: 0;
+}
+body.map-enlarged { overflow: hidden; }
+.map-size-button {
+  margin: 10px;
+  padding: 7px 11px;
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--text);
+  background: #fff;
+  border: 0;
+  border-radius: 4px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+}
+.map-legend { font-size: 0.85rem; color: var(--muted); margin: -4px 0 8px; line-height: 1.9; }
+.map-legend .pin { display: inline-block; width: 14px; height: 20px; margin: 0 4px -5px 10px; }
+.map-legend .small-area {
+  display: inline-block; width: 10px; height: 10px; margin: 0 4px -1px 10px; border-radius: 50%;
+  background: #f16913; border: 2px solid #7a1f00;
+}
 .map-legend .swatch, .map-legend .dot {
   display: inline-block; width: 14px; height: 14px; margin: 0 4px -2px 10px; border-radius: 3px;
 }
 .map-legend .swatch:first-child { margin-left: 0; }
 .map-legend .dot { border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px #bbb; }
 .results-nearest { margin: 10px 0 0; }
+.results-note { color: var(--muted); font-size: 0.85rem; margin: 6px 0 0; }
+/* The analogue areas as sharp blocks when zoomed in (Google smooths image overlays, so that
+   the 8 km blocks looked larger than they are; user's test 2026-10-30) */
+.results-map img[src*="maps/bundle_"] { image-rendering: pixelated; }
 
 /* Stripes graphic (SVG from js/stripes.js) */
 .stripes-subtitle { color: var(--muted); font-size: 0.9rem; margin: -6px 0 6px; }
@@ -213,7 +298,7 @@ button.back-to-start {
 #play-again { margin: 22px 0 12px; }
 
 @media (min-width: 760px) {
-  .results-numbers { grid-template-columns: repeat(3, 1fr); }
+  .results-numbers { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
 }
 
 
@@ -246,7 +331,7 @@ body.playing { overflow: hidden; }
   font-weight: 600;
 }
 .play-bar #play-score { margin-left: auto; }
-.play-exit {
+button.play-exit {             /* "button." so that it wins over button.back-to-start (white) */
   font: inherit;
   font-size: 0.85rem;
   font-weight: 400;
@@ -321,6 +406,7 @@ body.playing { overflow: hidden; }
 .reveal-text { padding: 14px 16px 18px; }
 .reveal-text p { margin: 0 0 10px; }
 .reveal-distance { font-size: 1.2rem; font-weight: 700; }
+.reveal-climate { line-height: 1.4; }
 
 /* Wide screens (computer): the guess map stays small in the lower right corner, as in
    the prototype, and grows while the mouse is over it; no open / close buttons. */

@@ -1,7 +1,8 @@
 // Play screen (app_plan.md §7, §10): five rounds for the chosen place. Each round shows a
 // Street View panorama from the place's analogue regions (where a summer like the place's
 // 2026 is a normal summer); the player guesses the location on a world map.
-// Points per round: 5,000 x exp(-distance / 2,000 km) (GeoGuessr-like, §7).
+// Points per round: 5,000 x exp(-distance / 2,000 km) (GeoGuessr-like, §7), plus up to 5,000
+// climate points for how normal the place's summer 2026 is at the guessed place (§16, climate.js).
 // Phone first: Street View fills the screen, the guess map opens as a panel from below;
 // on wide screens the guess map stays small in the corner.
 // All maps here are Google maps: Google's terms do not allow Street View next to another
@@ -12,6 +13,8 @@ import { t } from "./i18n.js";
 import { loadGoogleMaps } from "./google.js";
 import { loadPool, loadRegions, loadBundle } from "./data.js";
 import { sendEvent } from "./events.js";
+import { shownImages, rememberGame } from "./memory.js";
+import { climateOfGuess } from "./climate.js";
 
 const MAX_POINTS = 5000;
 const SCALE_KM = 2000;
@@ -46,7 +49,7 @@ export async function startPlay(place, finished) {
     place: place,
     regions: regions,
     bundle: bundle,
-    rounds: choosePanoramas(panoramas, bundle.regions, window.APP_SETTINGS.rounds),
+    rounds: choosePanoramas(panoramas, bundle.regions, window.APP_SETTINGS.rounds, shownImages()),
     roundIndex: 0,
     state: "guessing",      // "guessing" -> "revealed" -> next round; blocks double clicks
     results: []
@@ -55,6 +58,7 @@ export async function startPlay(place, finished) {
   // (2026-10-27: a user saw three rounds from South Africa and the same image twice).
   console.info("Rounds drawn for " + place.name + " (bundle " + place.cell.bundle + "):\n" +
     game.rounds.map((p, k) => (k + 1) + ". " + regionName(p.region_id) + ", " + p.pano_id).join("\n"));
+  rememberGame(place, game.rounds, regionName);
   showLoading(false);
   makeMaps();
   startRound();
@@ -74,19 +78,27 @@ export async function startPlay(place, finished) {
 // Choice of the five panoramas
 // ---------------------------------------------------------------------------------
 
-// Rule of method_decision.md §9a: draw a region with probability proportional to the
-// square root of its analogue area (only regions with at least one panorama), then a
-// random panorama in it. Each region at most once per game, so that the rounds show
+// Draw a region with probability proportional to sqrt(analogue area) x sqrt(number of its
+// panoramas) (only regions with at least one panorama), then a random panorama in it.
+// Weighting by area alone (method_decision.md §9a) made the single image of a large region
+// come again and again; weighting by images alone favours the countries with many images
+// (script 35, data_and_tests.md §27). This mixed weight halves the repeats. Each region at most once per game, so that the rounds show
 // different regions. Regions not in the bundle file (less than 25 km² of analogue area,
 // data_and_tests.md §20) get the weight of 25 km².
-function choosePanoramas(panoramas, regions, count) {
+// Images shown in earlier games in this browser (avoid) are left out, so that the same image
+// does not come again soon (app_plan.md §14); when fewer regions than rounds are left, the
+// memory is ignored for this game.
+function choosePanoramas(panoramas, regions, count, avoid = new Set()) {
+  const fresh = panoramas.filter(pano => !avoid.has(pano.pano_id));
+  if (new Set(fresh.map(pano => pano.region_id)).size >= count) panoramas = fresh;
   const byRegion = new Map();
   for (const pano of panoramas) {
     if (!byRegion.has(pano.region_id)) byRegion.set(pano.region_id, []);
     byRegion.get(pano.region_id).push(pano);
   }
   const areaOf = new Map(regions.map(r => [r.region_id, r.area_km2]));
-  let candidates = [...byRegion.keys()].map(id => ({ id: id, weight: Math.sqrt(areaOf.get(id) || 25) }));
+  let candidates = [...byRegion.keys()].map(id => ({
+    id: id, weight: Math.sqrt(areaOf.get(id) || 25) * Math.sqrt(byRegion.get(id).length) }));
 
   const chosen = [];
   while (chosen.length < count && candidates.length > 0) {
@@ -159,6 +171,10 @@ function startRound() {
   document.getElementById("reveal-panel").hidden = true;
 
   game.panoRetries = 0;
+  // The panorama keeps the size of its box from when it was last visible. If the window
+  // changed size in between (e.g. the results map in full screen, app_test_notes 29.10 point 6),
+  // Street View drew only a small image in a corner; "resize" makes it measure its box again.
+  google.maps.event.trigger(streetView, "resize");
   streetView.setPano(pano.pano_id);
   streetView.setPov({ heading: Math.random() * 360, pitch: 0 });
   streetView.setZoom(0);
@@ -184,21 +200,30 @@ function placeGuess(latLng) {
   button.textContent = t("guess_confirm");
 }
 
-function confirmGuess() {
+async function confirmGuess() {
   if (guessMarker === null || game.state !== "guessing") return;   // e.g. a double tap
   game.state = "revealed";
   const pano = game.rounds[game.roundIndex];
   const guess = guessMarker.getPosition();
   const distance = distanceKm(guess.lat(), guess.lng(), pano.lat, pano.lon);
   const points = Math.round(MAX_POINTS * Math.exp(-distance / SCALE_KM));
-  const result = { pano: pano, guess: { lat: guess.lat(), lon: guess.lng() }, distance: distance, points: points };
+  // Climate points: how normal the place's summer 2026 is at the guessed place (§16).
+  let climate;
+  try {
+    climate = await climateOfGuess(game.bundle, guess.lng(), guess.lat());
+  } catch (error) {
+    console.error(error);
+    climate = { points: 0, failed: true };
+  }
+  const result = { pano: pano, guess: { lat: guess.lat(), lon: guess.lng() }, distance: distance,
+                   points: points, climate: climate };
   game.results.push(result);
   // For a possible analysis of what people think the analogues are (§10 point 5): the
   // guess rounded to 0.1 degree, the panorama and the distance; nothing about the person.
   sendEvent("guess_made", {
     bundle: game.place.cell.bundle, round: game.roundIndex + 1, pano_id: pano.pano_id, region_id: pano.region_id,
     guess_lat: Math.round(guess.lat() * 10) / 10, guess_lon: Math.round(guess.lng() * 10) / 10,
-    distance_km: Math.round(distance), points: points
+    distance_km: Math.round(distance), points: points, climate_points: climate.points
   });
   openGuessPanel(false);
   showReveal(result);
@@ -236,8 +261,11 @@ function showReveal(result) {
 
   document.getElementById("reveal-distance").textContent =
     t("reveal_distance", { km: formatNumber(Math.round(result.distance)), points: pointsText(result.points) });
+  document.getElementById("reveal-climate").textContent =
+    t("reveal_climate_points", { points: pointsText(result.climate.points) });
+  document.getElementById("reveal-climate-text").textContent = climateText(result.climate);
   document.getElementById("reveal-place").textContent = t("reveal_place", {
-    place: regionName(result.pano.region_id), date: formatDate(result.pano.date), home: game.place.name
+    place: regionName(result.pano.region_id), date: formatDate(result.pano.date), home: game.place.phrase
   });
   document.getElementById("play-score").textContent = pointsText(totalPoints());
   const last = game.roundIndex + 1 === game.rounds.length;
@@ -289,8 +317,36 @@ function pointsText(points) {
   return points === 1 ? t("points_one") : t("points_many", { points: formatNumber(points) });
 }
 
+// Distance points and climate points of all rounds so far.
 function totalPoints() {
-  return game.results.reduce((sum, r) => sum + r.points, 0);
+  return game.results.reduce((sum, r) => sum + r.points + r.climate.points, 0);
+}
+
+// The line below the climate points: "Ein normaler Sommer am Ort deines Tipps, verglichen mit
+// deinem Sommer 2026 in Zürich (ZH): 1.8 °C kühler, 35 % feuchter." The comparison is with the
+// place's own summer 2026 (the numbers of the results screen); differences below 0.5 °C or
+// 10 % count as "about the same".
+function climateText(climate) {
+  if (climate.failed) return "";
+  if (climate.sea) return t("reveal_climate_sea");
+  if (climate.meanT === undefined) return t("reveal_climate_area");   // orange area without 8 km data
+
+  const cell = game.place.cell;
+  const differenceT = climate.meanT - cell.t_2026;
+  const differenceP = (climate.meanP / cell.p_2026 - 1) * 100;
+  let warmth = t("climate_same_t");
+  if (differenceT >= 0.5) warmth = t("climate_warmer", { value: formatDecimal(differenceT) });
+  if (differenceT <= -0.5) warmth = t("climate_cooler", { value: formatDecimal(-differenceT) });
+  let wetness = t("climate_same_p");
+  if (differenceP >= 10) wetness = t("climate_wetter", { value: formatNumber(Math.round(differenceP)) });
+  if (differenceP <= -10) wetness = t("climate_drier", { value: formatNumber(Math.round(-differenceP)) });
+  let text = t("reveal_climate_compare", { warmth: warmth, wetness: wetness, home: game.place.phrase });
+  if (climate.inArea) text += " " + t("reveal_climate_in_area");
+  return text;
+}
+
+function formatDecimal(value) {
+  return value.toLocaleString("de-CH", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 }
 
 function showLoading(loading) {

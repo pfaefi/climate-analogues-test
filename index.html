@@ -4,17 +4,25 @@
   <meta charset="utf-8">
   <meta name="robots" content="noindex, nofollow">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Wo wäre dein Sommer 2026 normal?</title>
+  <title>Hitzesommer-Guesser</title>
   <link rel="stylesheet" href="lib/leaflet-1.9.4/leaflet.css">
   <link rel="stylesheet" href="css/app.css">
 </head>
 <body>
+
+  <!-- Banner on every screen: the summers of Switzerland 1961-2026 as stripes (js/banner.js)
+       and the name of the app; on the play screen only a thin band -->
+  <header class="site-header">
+    <div id="stripes-band" class="stripes-band" role="img"></div>
+    <p class="site-title"><span data-text="app_name"></span></p>
+  </header>
 
   <!-- Start: introduction and choice of the place -->
   <section id="screen-start" class="screen">
     <header class="intro">
       <h1 data-text="start_title"></h1>
       <p data-text="start_intro"></p>
+      <p data-text="start_choose"></p>
       <p class="how" data-text="start_how"></p>
     </header>
 
@@ -31,6 +39,7 @@
       <p id="chosen-name" class="chosen-name"></p>
       <p id="chosen-cell" class="chosen-cell"></p>
       <p id="chosen-hint" class="chosen-hint" hidden></p>
+      <p id="chosen-urban" class="urban-note" data-text="urban_note" hidden></p>
       <p id="chosen-message" class="chosen-message"></p>
       <button id="play-button" class="primary" type="button" data-text="play_button" hidden></button>
       <a id="skip-link" class="skip-link" href="#" data-text="skip_link" hidden></a>
@@ -39,6 +48,7 @@
     <footer class="page-footer">
       <a href="info.html" data-text="link_info"></a>
       <a href="methods.html" data-text="link_methods"></a>
+      <a href="about.html" data-text="link_about"></a>
       <p class="credits" data-text="credits"></p>
     </footer>
   </section>
@@ -65,6 +75,8 @@
       <div id="reveal-map" class="reveal-map"></div>
       <div class="reveal-text">
         <p id="reveal-distance" class="reveal-distance"></p>
+        <p id="reveal-climate" class="reveal-distance"></p>
+        <p id="reveal-climate-text" class="reveal-climate"></p>
         <p id="reveal-place"></p>
         <button id="next-button" class="primary" type="button"></button>
       </div>
@@ -77,18 +89,23 @@
     <h1 id="results-place"></h1>
     <div id="results-numbers" class="results-numbers"></div>
     <p class="numbers-note" data-text="numbers_note"></p>
+    <p id="results-urban" class="urban-note" data-text="urban_note_results" hidden></p>
     <p id="results-score" class="results-score" hidden></p>
+    <p id="results-record" class="results-record" hidden></p>
 
     <h2 data-text="results_map_title"></h2>
-    <div id="results-map" class="results-map"></div>
     <p class="map-legend">
-      <span class="swatch" style="background:#a63603"></span><span data-text="legend_most"></span>
+      <span id="legend-areas"><span class="swatch" style="background:#a63603"></span><span data-text="legend_most"></span>
       <span class="swatch" style="background:#f16913"></span><span data-text="legend_part"></span>
-      <span class="swatch" style="background:#fdae6b"></span><span data-text="legend_little"></span>
+      <span class="swatch" style="background:#fdae6b"></span><span data-text="legend_little"></span></span>
+      <span id="legend-dots"><span class="small-area"></span><span id="legend-dots-text"></span></span>
+      <svg class="pin" viewBox="0 0 14 20" aria-hidden="true"><path d="M7 0C3.1 0 0 3.1 0 7c0 5.2 7 13 7 13s7-7.8 7-13c0-3.9-3.1-7-7-7z" fill="#ea4335" stroke="#a52714"/><text x="7" y="10.5" font-size="8" text-anchor="middle" fill="white">★</text></svg><span data-text="legend_place"></span>
       <span id="legend-game"><span class="dot" style="background:#1a9850"></span><span data-text="legend_images"></span>
       <span class="dot" style="background:#6b6b6b"></span><span data-text="legend_guesses"></span></span>
     </p>
+    <div id="results-map" class="results-map"></div>
     <p id="results-nearest" class="results-nearest"></p>
+    <p class="results-note" data-text="results_tropics"></p>
 
     <div id="stripes-box">
       <h2 id="stripes-title"></h2>
@@ -109,7 +126,15 @@
     <footer class="page-footer">
       <a href="info.html" data-text="link_info"></a>
       <a href="methods.html" data-text="link_methods"></a>
+      <a href="about.html" data-text="link_about"></a>
     </footer>
+  </section>
+
+  <!-- Text pages (info, methods, about) shown inside the app, so that «Zurück» returns to the
+       screen that was open before (js/pages.js) -->
+  <section id="screen-page" class="screen text-page" hidden>
+    <p><a id="page-back" href="#">← Zurück</a></p>
+    <div id="page-content"></div>
   </section>
 
   <script src="settings.js"></script>

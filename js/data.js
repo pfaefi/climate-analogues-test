@@ -39,6 +39,14 @@ export async function loadCell(lon, lat) {
   return { status: "ok", cell: cell };
 }
 
+// Is the cell densely built-up? Then the grid data miss the urban heat island and the app
+// adds a note (built_up_percent from script 34; threshold in settings.js).
+export function isUrban(cell) {
+  const threshold = window.APP_SETTINGS.urbanNoteThreshold;
+  if (threshold === null || cell.built_up_percent === undefined || cell.built_up_percent === null) return false;
+  return cell.built_up_percent >= threshold;
+}
+
 // Positions in the Street View pool that a bundle may use (script 28).
 export async function loadBundlePanoramas(bundle) {
   const file = "streetview/bundle_" + String(bundle).padStart(5, "0") + ".json";

@@ -7,10 +7,15 @@ import { startPlay } from "./play.js";
 import { showResultsScreen } from "./results.js";
 import { surveyBeforeGame, surveyAfterGame } from "./survey.js";
 import { sendEvent } from "./events.js";
+import { offerLogDownload } from "./memory.js";
+import { initPages } from "./pages.js";
+import { drawBanner } from "./banner.js";
 
 let currentPlace = null;      // the place of the last game or results (for «Nochmals spielen»)
+let currentScreen = "start";  // the visible screen (a text page returns to it)
 
 function showScreen(name) {
+  currentScreen = name;
   for (const screen of document.querySelectorAll(".screen")) {
     screen.hidden = screen.id !== "screen-" + name;
   }
@@ -44,11 +49,14 @@ async function main() {
   await loadTexts(window.APP_SETTINGS.language);
   document.title = t("page_title");
   fillTexts();
+  drawBanner();
   initStart(startGame, place => showResults(place));
   for (const button of document.querySelectorAll(".back-to-start")) {
     button.addEventListener("click", () => showScreen("start"));
   }
   document.getElementById("play-again").addEventListener("click", () => startGame(currentPlace));
+  initPages(showScreen, () => currentScreen);
+  offerLogDownload();
   showScreen("start");
 }
 

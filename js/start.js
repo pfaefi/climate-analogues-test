@@ -1,8 +1,8 @@
 // Start screen (app_plan.md §10): short introduction, choose a place by typing (place
 // search of geo.admin.ch) or by tapping on the swisstopo map, then play or skip the game.
 
-import { t } from "./i18n.js";
-import { loadCell, loadBundlePanoramas } from "./data.js";
+import { t, withElevation } from "./i18n.js";
+import { loadCell, loadBundlePanoramas, isUrban } from "./data.js";
 import { sendEvent } from "./events.js";
 
 const SEARCH_URL = "https://api3.geo.admin.ch/rest/services/api/SearchServer";
@@ -52,7 +52,7 @@ function initMap() {
     const lat = event.latlng.lat;
     const lon = event.latlng.lng;
     const name = await municipalityAt(lon, lat);
-    choosePlace(name || t("clicked_place"), lon, lat, "map");
+    choosePlace(name, lon, lat, "map");
   });
 }
 
@@ -122,7 +122,10 @@ async function searchPlaces(text) {
       name: label.name, kind: label.kind, municipality: label.municipality,
       lon: r.attrs.lon, lat: r.attrs.lat,
       municipalityOnly: r.attrs.origin === "gg25",
-      settlement: r.attrs.objectclass === "TLM_SIEDLUNGSNAME"
+      settlement: r.attrs.objectclass === "TLM_SIEDLUNGSNAME",
+      // Municipalities and settlements are named "in Thalwil", other places (peaks,
+      // glaciers, areas) "bei ...".
+      inside: r.attrs.origin === "gg25" || r.attrs.objectclass === "TLM_SIEDLUNGSNAME"
     };
     const same = places.find(p => p.name === place.name);
     if (same === undefined) {
@@ -196,7 +199,7 @@ function showSuggestions(results, list, input) {
       input.value = result.name;
       input.blur();                                    // closes the keyboard on phones
       map.setView([result.lat, result.lon], 12);
-      choosePlace(result.name, result.lon, result.lat, "search", result.municipalityOnly);
+      choosePlace(result.name, result.lon, result.lat, "search", result.municipalityOnly, result.inside);
     });
     item.append(button);
     list.append(item);
@@ -208,16 +211,19 @@ function showSuggestions(results, list, input) {
 // The chosen place: load its cell and its images, then show the card
 // ---------------------------------------------------------------------------------
 
-// middle: the point is only the middle of a municipality's area (note on the card).
-async function choosePlace(name, lon, lat, how, middle = false) {
+// name: the place's name, or null for a tapped point outside any municipality.
+// how: "search" or "map". middle: the point is only the middle of a municipality's area
+// (note on the card). inside: a settlement or municipality from the search ("in ...").
+async function choosePlace(name, lon, lat, how, middle = false, inside = false) {
   const thisChoice = ++choiceNumber;
   choice = null;
+  const label = placeLabel(name, how === "search" && inside);
   if (marker === null) {
     marker = L.circleMarker([lat, lon], { radius: 9, color: "#7a1f00", weight: 3, fillColor: "#e8590c", fillOpacity: 0.9 }).addTo(map);
   } else {
     marker.setLatLng([lat, lon]);
   }
-  showCard({ name: name, state: "loading" });
+  showCard({ name: label.title, state: "loading" });
 
   let result;
   let panoramas = [];
@@ -225,19 +231,29 @@ async function choosePlace(name, lon, lat, how, middle = false) {
     result = await loadCell(lon, lat);
     if (result.status === "ok") panoramas = await loadBundlePanoramas(result.cell.bundle);
   } catch (error) {
-    if (thisChoice === choiceNumber) showCard({ name: name, state: "error" });
+    if (thisChoice === choiceNumber) showCard({ name: label.title, state: "error" });
     return;
   }
   if (thisChoice !== choiceNumber) return;             // the user chose another place meanwhile
 
   if (result.status === "outside") {
-    showCard({ name: name, state: "outside" });
+    showCard({ name: label.title, state: "outside" });
     return;
   }
-  choice = { name: name, lon: lon, lat: lat, cell: result.cell, panoramas: panoramas };
-  showCard({ name: name, state: panoramas.length > 0 ? "ready" : "no_images", cell: result.cell, middle: middle });
+  choice = { name: label.title, phrase: label.phrase, lon: lon, lat: lat, cell: result.cell, panoramas: panoramas };
+  showCard({ name: label.title, state: panoramas.length > 0 ? "ready" : "no_images", cell: result.cell, middle: middle });
   // Only the bundle (a group of cells with almost the same summer) is recorded, not the point.
   sendEvent("place_chosen", { bundle: result.cell.bundle, how: how, images: panoramas.length > 0 });
+}
+
+// How the place is named on the card (title) and in sentences (phrase). A place from the
+// search: "Thalwil (ZH)" and "in Thalwil (ZH)". A tapped point: "bei Adliswil (ZH)" in both,
+// because the point need not be the village centre and its 1 km cell can differ from it.
+function placeLabel(name, inside) {
+  if (name === null) return { title: t("clicked_place"), phrase: t("place_point") };
+  if (inside) return { title: name, phrase: t("place_in", { name: name }) };
+  const near = t("place_near", { name: name });
+  return { title: near, phrase: near };
 }
 
 function showCard(info) {
@@ -246,13 +262,15 @@ function showCard(info) {
   const skipLink = document.getElementById("skip-link");
   const message = document.getElementById("chosen-message");
   card.hidden = false;
-  document.getElementById("chosen-name").textContent = info.name;
-  document.getElementById("chosen-cell").textContent =
-    info.cell ? t("chosen_cell", { elevation: Math.round(info.cell.elevation) }) : "";
+  // The name with the elevation of the 1 km cell, as in the results heading (once the cell is known).
+  document.getElementById("chosen-name").textContent =
+    info.cell ? withElevation(info.name, info.cell.elevation) : info.name;
+  document.getElementById("chosen-cell").textContent = info.cell ? t("chosen_cell") : "";
   // A hint how to choose a more exact point (with a note if it is a municipality's middle).
   const hint = document.getElementById("chosen-hint");
   hint.hidden = !info.cell;
   hint.textContent = info.middle ? t("chosen_hint_middle") : t("chosen_hint");
+  document.getElementById("chosen-urban").hidden = !(info.cell && isUrban(info.cell));
 
   const texts = { loading: "chosen_loading", outside: "chosen_outside", error: "chosen_error", no_images: "chosen_no_images" };
   message.textContent = texts[info.state] ? t(texts[info.state]) : "";

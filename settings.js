@@ -10,6 +10,10 @@ window.APP_SETTINGS = {
   // Number of rounds per game.
   rounds: 5,
 
+  // Built-up share [%] of the 1 km cell from which the app notes that the grid data miss the
+  // urban heat island (app_plan.md §13; script 34). null switches the note off.
+  urbanNoteThreshold: 50,
+
   // Usage data (§10 point 5, §10a): nothing is sent while endpoint is null.
   events: {
     endpoint: null
