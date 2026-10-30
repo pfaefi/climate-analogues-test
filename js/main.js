@@ -64,6 +64,10 @@ async function main() {
   for (const button of document.querySelectorAll(".back-to-start")) {
     button.addEventListener("click", backToSearch);
   }
+  // The play screen's exit button shows only «✕» on phones: its name for screen readers.
+  const exit = document.querySelector(".play-exit");
+  exit.setAttribute("aria-label", t("play_exit"));
+  exit.title = t("play_exit");
   document.getElementById("play-again").addEventListener("click", () => startGame(currentPlace));
   initPages(showScreen, () => currentScreen);
   offerLogDownload();

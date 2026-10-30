@@ -59,7 +59,9 @@
     <div class="play-bar">
       <span id="play-round"></span>
       <span id="play-score"></span>
-      <button class="back-to-start play-exit" type="button" data-text="play_exit"></button>
+      <!-- «Abbrechen» on wide screens, «✕» on narrow ones (with large points and large system
+           fonts the word was cut off; the button's label is set in main.js) -->
+      <button class="back-to-start play-exit" type="button"><span class="exit-long" data-text="play_exit"></span><span class="exit-short" aria-hidden="true">✕</span></button>
     </div>
     <p id="play-loading" class="play-loading"></p>
     <div id="street-view" class="street-view"></div>
@@ -75,9 +77,9 @@
       <div id="reveal-map" class="reveal-map"></div>
       <div class="reveal-text">
         <p id="reveal-distance" class="reveal-distance"></p>
+        <p id="reveal-place"></p>
         <p id="reveal-climate" class="reveal-distance"></p>
         <p id="reveal-climate-text" class="reveal-climate"></p>
-        <p id="reveal-place"></p>
         <button id="next-button" class="primary" type="button"></button>
       </div>
     </div>

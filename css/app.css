@@ -345,7 +345,12 @@ body.playing { overflow: hidden; }
   font-weight: 600;
 }
 .play-bar #play-score { margin-left: auto; }
-.play-bar span { white-space: nowrap; }    /* «Runde 1 von 5» on one line, also with large system fonts */
+.play-bar > span {                          /* «Runde 1 von 5» on one line, also with large system fonts */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;                  /* if it is still too long, the text ends in «…» */
+  min-width: 0;
+}
 button.play-exit {             /* "button." so that it wins over button.back-to-start (white) */
   font: inherit;
   font-size: 0.85rem;
@@ -356,6 +361,13 @@ button.play-exit {             /* "button." so that it wins over button.back-to-
   border-radius: 8px;
   padding: 5px 10px;
   cursor: pointer;
+  flex-shrink: 0;                /* never squeezed or cut off; the texts beside it give way */
+}
+.play-exit .exit-short { display: none; font-size: 1.1rem; line-height: 1; }
+@media (max-width: 599px) {
+  .play-exit .exit-long { display: none; }
+  .play-exit .exit-short { display: inline; }
+  button.play-exit { padding: 6px 11px; }
 }
 
 .play-loading {

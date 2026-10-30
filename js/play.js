@@ -246,6 +246,8 @@ function distanceKm(lat1, lon1, lat2, lon2) {
 
 function showReveal(result) {
   document.getElementById("reveal-panel").hidden = false;
+  // Always start at the top of the text (the points), not where the last round was scrolled to.
+  document.querySelector(".reveal-text").scrollTop = 0;
   for (const object of revealObjects) object.setMap(null);
   const truth = { lat: result.pano.lat, lng: result.pano.lon };
   const guess = { lat: result.guess.lat, lng: result.guess.lon };
