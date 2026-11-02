@@ -10,8 +10,10 @@
 <body>
   <!--
     About page with the legal notice (Impressum), contact and data protection (app_plan.md §14).
-    SKELETON written by Claude on 2026-10-28: the parts in [brackets] are to be filled in by
-    the user (names, institution, contact, role of WSL).
+    Skeleton by Claude on 2026-10-28, text by the user on 2026-11-02. Still to do (user, 2026-11-02:
+    not yet): a contact address in the Impressum, and possibly the institution (WSL). External links open in a new tab, so that the game keeps its state.
+    Check the data protection text as soon as usage data (settings.js events.endpoint) or the
+    survey (settings.js survey.enabled) are switched on.
   -->
   <section class="screen text-page">
     <p><a href="index.html">← Zurück</a></p>
@@ -19,26 +21,39 @@
     <h1>Über das Projekt</h1>
 
     <h2>Das Projekt</h2>
-    <p>Der Hitzesommer-Guesser zeigt, wo auf der Welt ein Sommer wie der Extremsommer 2026 an einem Ort
-    in der Schweiz heute zum Alltag gehört. [Kurze Beschreibung: Ziel, wer das Projekt macht, Stand.]</p>
+    <p>Der Hitzesommer-Guesser zeigt, wo auf der Welt ein Sommer wie der Extremsommer 2026 in der Schweiz heute zum Alltag gehört. Ziel ist es, spielerisch zu zeigen, in welche Richtung sich das Klima in der Schweiz verändert. Eine Herausforderung bei solchen Klimaanalogien ist, dass Orte, die unser zukünftiges Klima schon heute haben, oft mit Ferien und anderen positiven Assoziationen verknüpft sind. Solche Vergleiche können deshalb dazu führen, dass der Klimawandel als harmloser wahrgenommen wird (Retchless 2014; O'Neill et al. 2023). Das Spiel kann dieses Problem nicht beheben, aber vielleicht mindern: Es zeigt viele verschiedene, zufällig gewählte Alltagsbilder aus ländlichen Gebieten statt typischer Ferienbilder.</p>
 
     <h2>Impressum</h2>
-    <p>[Verantwortlich: Name, Institution]<br>
-    [Adresse]<br>
-    [Kontakt: E-Mail-Adresse]</p>
+    <p>Idee und Entwicklung: Raphael Neukom<br>
+    Programmierung: mit Claude Code (Anthropic)<br>
+    Stand: 2. November 2026</p>
 
     <h2>Datenschutz</h2>
     <p>Die App setzt keine Cookies und sendet keine persönlichen Daten an uns. Die App merkt sich in
     deinem Browser (lokaler Speicher), welche Bilder du schon gesehen hast (damit sie sich nicht
-    wiederholen), und deinen Punkterekord; diese Angaben bleiben auf deinem Gerät. [Text noch zu prüfen, sobald Nutzungsdaten
-    oder eine Umfrage eingeschaltet werden.]</p>
+    wiederholen), und deinen Punkterekord; diese Angaben bleiben auf deinem Gerät.</p>
     <p>Beim Aufruf der Seite erhalten Dienste von Dritten technische Daten wie die IP-Adresse:
-    swisstopo (Karte der Schweiz, Ortssuche), Google (Weltkarten und Strassenbilder) und der Anbieter,
-    auf dessen Server die App liegt. [Links zu deren Datenschutzerklärungen ergänzen.]</p>
+    swisstopo (Karte der Schweiz, Ortssuche;
+    <a href="https://www.admin.ch/gov/de/start/rechtliches.html" target="_blank" rel="noopener">Datenschutzerklärung der Bundesverwaltung</a>),
+    Google (Weltkarten und Strassenbilder;
+    <a href="https://policies.google.com/privacy?hl=de" target="_blank" rel="noopener">Datenschutzerklärung</a>)
+    und GitHub, auf dessen Server (GitHub Pages) die App zurzeit liegt
+    (<a href="https://docs.github.com/de/site-policy/privacy-policies/github-general-privacy-statement" target="_blank" rel="noopener">Datenschutzerklärung</a>).</p>
 
     <h2>Daten und Quellen</h2>
     <p>Die verwendeten Daten und ihre Lizenzen stehen auf der Seite
     <a href="methods.html">Methoden und Einschränkungen</a>.</p>
+
+    <h2>Literatur</h2>
+    <ul class="small-list">
+      <li>O'Neill, S., Hayes, S., Strauß, N., Doutreix, M.-N., Steentjes, K., Ettinger, J., Westwood, N., Painter, J. (2023):
+      Visual portrayals of fun in the sun in European news outlets misrepresent heatwave risks.
+      The Geographical Journal 189(1), 90–103,
+      <a href="https://doi.org/10.1111/geoj.12487" target="_blank" rel="noopener">doi:10.1111/geoj.12487</a>.</li>
+      <li>Retchless, D. P. (2014): Communicating climate change: spatial analog versus color-banded isoline maps
+      with and without accompanying text. Cartography and Geographic Information Science 41(1), 55–74,
+      <a href="https://doi.org/10.1080/15230406.2013.826479" target="_blank" rel="noopener">doi:10.1080/15230406.2013.826479</a>.</li>
+    </ul>
   </section>
 </body>
 </html>
