@@ -153,7 +153,10 @@ function makeMaps() {
       streetView.setPano(expected);
     }
   });
+  // A start view: a map created without centre and zoom in a hidden box sometimes loaded no
+  // tiles when it was first shown, until the user zoomed (user's test 2026-11-02).
   revealMap = new google.maps.Map(document.getElementById("reveal-map"), {
+    center: { lat: 30, lng: 10 }, zoom: 1,
     streetViewControl: false, mapTypeControl: false, fullscreenControl: false,
     clickableIcons: false, gestureHandling: "greedy"
   });
@@ -244,6 +247,26 @@ function distanceKm(lat1, lon1, lat2, lon2) {
 // Result of a round
 // ---------------------------------------------------------------------------------
 
+// Zoom the result map to the guess and the image location. The map box was hidden until just
+// now, so the map first measures its box again ("resize", as for Street View) and the view is
+// set only in the next frame, when the box has its size. If the map still shows no tiles after
+// a few seconds (it stayed grey until the user zoomed, user's test 2026-11-02), one zoom step
+// out and back makes it load them, as the user's own zoom did.
+function showRevealView(bounds) {
+  requestAnimationFrame(() => {
+    google.maps.event.trigger(revealMap, "resize");
+    revealMap.fitBounds(bounds, 50);
+    let tilesLoaded = false;
+    google.maps.event.addListenerOnce(revealMap, "tilesloaded", () => { tilesLoaded = true; });
+    setTimeout(() => {
+      if (tilesLoaded || document.getElementById("reveal-panel").hidden) return;
+      const zoom = revealMap.getZoom();
+      google.maps.event.addListenerOnce(revealMap, "idle", () => revealMap.setZoom(zoom));
+      revealMap.setZoom(zoom - 1);
+    }, 3000);
+  });
+}
+
 function showReveal(result) {
   document.getElementById("reveal-panel").hidden = false;
   // Always start at the top of the text (the points), not where the last round was scrolled to.
@@ -260,7 +283,7 @@ function showReveal(result) {
   const bounds = new google.maps.LatLngBounds();
   bounds.extend(guess);
   bounds.extend(truth);
-  revealMap.fitBounds(bounds, 50);
+  showRevealView(bounds);
 
   document.getElementById("reveal-distance").textContent =
     t("reveal_distance", { km: formatNumber(Math.round(result.distance)), points: pointsText(result.points) });
