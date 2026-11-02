@@ -4,102 +4,129 @@
   <meta charset="utf-8">
   <meta name="robots" content="noindex, nofollow">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Methoden und Grenzen</title>
+  <title>Methoden und Einschränkungen</title>
   <link rel="stylesheet" href="css/app.css">
 </head>
 <body>
   <!--
-    Methods and limitations page (app_plan.md §10, §11d). DRAFT written by Claude on
-    2026-10-27 from documentation/product_notes_and_limitations.md (L1-L14),
-    method_decision.md and data_and_tests.md; to be reviewed by the user. One page per
-    language later (methods_fr.html etc.).
+    Methods and limitations page (app_plan.md §10, §11d). Draft by Claude on 2026-10-27 from
+    documentation/product_notes_and_limitations.md (L1-L16), method_decision.md and
+    data_and_tests.md; revised by the user on 2026-11-02. One page per language later
+    (methods_fr.html etc.). External links open in a new tab (target="_blank"), so that the
+    game in this tab keeps its state.
   -->
   <section class="screen text-page">
     <p><a href="index.html">← Zurück</a></p>
-    <p class="draft-note">Entwurf – Text noch nicht geprüft.</p>
-    <h1>Methoden und Grenzen</h1>
+    <h1>Methoden und Einschränkungen</h1>
 
     <h2>Die Frage</h2>
-    <p>Wo auf der Welt gehört ein Sommer, wie du ihn 2026 an deinem Ort in der Schweiz erlebt hast,
-    heute zum Alltag? Wir vergleichen dazu den beobachteten Sommer 2026 (Juni bis August)
+    <p>Wo auf der Welt gehören Temperatur und Niederschlag, wie du sie im Sommer 2026 an deinem Ort in der Schweiz erlebt hast,
+    heute zum Alltag? Anders gesagt: Wo entsprechen sie heute etwa dem langjährigen Durchschnitt? Dazu vergleichen wir den beobachteten Sommer 2026 (Juni bis August)
     jedes Ortes der Schweiz mit den Sommern 1991–2020 aller Landgebiete ausserhalb der Tropen.
-    Wir verwenden nur Beobachtungsdaten, keine Klimamodelle oder Szenarien.</p>
+    Wir verwenden nur Messdaten, keine Klimamodelle oder Szenarien.</p>
 
     <h2>Daten</h2>
     <ul>
-      <li><b>Dein Ort:</b> Gitterdaten von MeteoSchweiz (Monatsmittel der Temperatur und Monatssummen
-      des Niederschlags, 1 × 1 km). Jeder Ort steht für das 1-km-Feld, in dem er liegt. Die Werte für 2026
+      <li><b>Dein Ort:</b> Gitterdaten von MeteoSchweiz (räumliche Klimaanalysen, 1 × 1 km): Monatsmittel der Temperatur
+      (<a href="https://www.meteoswiss.admin.ch/dam/jcr:33e26211-9937-4f80-80a3-09cfe54663bc/ProdDoc_TabsM.pdf" target="_blank" rel="noopener">TabsM</a>)
+      und Monatssummen des Niederschlags
+      (<a href="https://www.meteoswiss.admin.ch/dam/jcr:d4f53a4a-d7f4-4e1e-a594-8ff4bfd1aca5/ProdDoc_RhiresM.pdf" target="_blank" rel="noopener">RhiresM</a>;
+      <a href="https://opendatadocs.meteoswiss.ch/c-climate-data/c3-ground-based-climate-data" target="_blank" rel="noopener">Daten</a>).
+      Jeder Ort steht für das 1-km-Feld, in dem er liegt. Die Werte für 2026
       stammen aus den vorläufigen Monatsdaten; wir rechnen neu, sobald das definitive Archiv vorliegt
       (Februar 2027).</li>
-      <li><b>Analogorte weltweit:</b> CHELSA, Version 2.1 (monatliche Klimadaten, rund 1 × 1 km;
-      Karger et al. 2017), Sommer 1991–2020. In der Südhemisphäre zählt Dezember bis Februar als Sommer.</li>
-      <li><b>Analogorte in der Schweiz und knapp jenseits der Grenze:</b> wieder die Daten von MeteoSchweiz,
+      <li><b>Analoggebiete weltweit:</b> CHELSA, Version 2.1 (monatliche Mitteltemperatur «tas» und Niederschlagssumme «pr»,
+      rund 1 × 1 km; Karger et al. 2017, 2025;
+      <a href="https://chelsa-climate.org/datasets/chelsa_monthly" target="_blank" rel="noopener">Daten</a>),
+      Sommer 1991–2020. Auf der Südhalbkugel zählt Dezember bis Februar als Sommer.</li>
+      <li><b>Analoggebiete in der Schweiz und knapp jenseits der Grenze:</b> Daten von MeteoSchweiz,
       weil CHELSA im Schweizer Flachland etwa 0,7 °C zu warm ist; am Rand dieses Gebiets gehen die beiden
       Datensätze über 5 km fliessend ineinander über.</li>
     </ul>
 
-    <h2>Wie wir die Analogorte finden</h2>
-    <p>Wir betrachten zwei Grössen: die mittlere Temperatur und den Niederschlag von Juni bis August.
-    Ein 1-km-Feld zählt als Analogort, wenn dein Sommer 2026 dort ein typischer Sommer ist:
-    Temperatur und Niederschlag liegen beide in der mittleren Hälfte der dortigen Sommer 1991–2020,
-    und auch die Kombination der beiden ist dort nicht ungewöhnlich (für Fachleute: Mahalanobis-Distanz,
-    umgerechnet in eine «Sigma»-Unähnlichkeit kleiner als 0,674, nach King et al. 2024).
-    Zusammenhängende Gebiete kleiner als 25 km² lassen wir weg. Benannt werden die Gebiete nach Regionen
-    (Kantone, Bundesstaaten, Provinzen; Natural Earth).</p>
-    <p>Damit die Rechnung machbar bleibt, haben wir die rund 47 000 Felder der Schweiz in Gruppen mit fast
-    gleichem Sommer 2026 zusammengefasst (Temperatur auf 0,1 °C, Niederschlag auf etwa 3 % genau).</p>
+    <h2>Methoden</h2>
+    <p>Das Vorgehen besteht aus zwei Teilen: Zuerst suchen wir mit statistischen Verfahren die Analoggebiete. Analoggebiete sind
+    die Gebiete auf der Welt, in denen das Sommerklima 2026 des ausgewählten Ortes in der Schweiz («dein Ort») heute dem
+    langjährigen Durchschnitt entspricht. In einem zweiten Schritt wählen wir passende Bilder aus den Analoggebieten für das Spiel aus.</p>
+
+    <h2>Wie wir die Analoggebiete finden</h2>
+    <p>Wir betrachten zwei Grössen: die mittlere Temperatur und die Niederschlagssumme von Juni bis August.
+    Ein 1-km-Feld gehört zu einem Analoggebiet, wenn der Sommer 2026 deines Ortes dort zwei Kriterien erfüllt:</p>
+    <ol>
+      <li>Temperatur und Niederschlag liegen beide in der mittleren Hälfte der dortigen Sommer 1991–2020 (statistisch:
+      etwa zwischen dem 25. und dem 75. Perzentil).</li>
+      <li>Auch die <i>Kombination</i> von Temperatur und Niederschlag ist dort nicht ungewöhnlich. Statistisch berechnen wir die
+      Mahalanobis-Distanz zu den dortigen Sommern 1991–2020 und rechnen sie in eine «Sigma»-Unähnlichkeit um
+      (Mahony et al. 2017; wie bei King et al. 2024 mit der Streuung der Sommer im jeweiligen 1-km-Feld). Sie muss kleiner als 0,674 sein;
+      auch dieser Wert steht für die mittlere Hälfte.</li>
+    </ol>
+    <p>Zusammenhängende Gebiete mit weniger als 25 km² Fläche lassen wir weg: Sie erscheinen weder auf der Karte noch bei
+    den Bildern oder den Klimapunkten. Benannt werden die Gebiete nach Regionen
+    (Kantone, Bundesstaaten, Provinzen; Daten von Natural Earth). Am Schluss jedes Spiels siehst du eine Karte, auf der
+    alle Analoggebiete markiert sind.</p>
+    <p>Damit die Rechnung machbar bleibt, haben wir die rund 47'000 Felder (1 × 1 km) der Schweiz in Gruppen mit fast
+    gleichem Sommer 2026 zusammengefasst: Innerhalb einer Gruppe unterscheidet sich die Temperatur um höchstens 0,1 °C und
+    der Niederschlag um etwa 3 %. Gesucht wird mit dem Durchschnittswert der Gruppe.</p>
 
     <h2>Die Strassenbilder</h2>
     <p>Die Bilder sind zufällig gewählte Google-Street-View-Aufnahmen aus den Analoggebieten deines Ortes:
     nur offizielle Aufnahmen von Google, nur aus dem dortigen Sommer (Juni bis September, auf der
-    Südhalbkugel Dezember bis März), nur auf Land, das nicht überbaut ist (Wald, Busch, Grasland, Acker;
-    ESA WorldCover). Jede Runde zeigt eine andere Region. Die Landschaften auf den Bildern sind von
-    Jahrzehnten Klima, Boden und Nutzung geprägt, nicht von einem einzelnen Sommer. In China gibt es keine
-    Street-View-Bilder; Gebiete dort erscheinen nur auf der Karte.</p>
+    Südhalbkugel Dezember bis März). Wir verwenden nur Bilder von Land, das nicht überbaut ist (Wald, Busch, Grasland, Acker;
+    Daten von ESA WorldCover), weil auf überbauten Flächen das Klima des Ortes kaum erkennbar ist.</p>
+    <p>Jede Runde zeigt ein Bild aus einer anderen Region. Manche Regionen (zum Beispiel in den USA) haben viel mehr
+    Street-View-Bilder als andere. Damit die Auswahl ausgewogen bleibt, ziehen wir zuerst eine Region und erst dann ein Bild
+    darin. Die Chance einer Region ist proportional zu √(Fläche ihres Analoggebiets) × √(Anzahl ihrer Bilder): Grosse
+    Regionen und solche mit vielen Bildern kommen häufiger an die Reihe, aber weniger stark, als es ihrer Fläche oder ihrer
+    Bildzahl entspräche. Bilder, die du schon gesehen hast, merkt sich dein Browser und zeigt sie in den nächsten Spielen
+    möglichst nicht wieder.</p>
+    <p>In China gibt es keine Street-View-Bilder, aber für einige Orte in der Schweiz durchaus Analoggebiete. Diese siehst
+    du auf der Karte am Ende des Spiels.</p>
 
     <h2>Die Punkte</h2>
-    <p>Pro Runde gibt es bis zu 5000 Punkte für den Ort: 5000 × e<sup>−Distanz / 2000 km</sup>.
-    Dazu kommen bis zu 5000 Klimapunkte: die vollen Punkte, wenn dein Tipp in einem der eingezeichneten
-    Gebiete liegt (in der Schweiz und rundherum auf 1 km genau, sonst in Blöcken von etwa 8 km, von denen
-    mindestens ein Drittel zum Gebiet gehört); sonst weniger, je ungewöhnlicher dein Sommer 2026 unter den normalen Sommern
-    1991–2020 am getippten Ort wäre (dieselbe Sigma-Unähnlichkeit wie oben, auf einem Raster von etwa
-    8 km, auch in den Tropen): 5000 × e<sup>−(Sigma − 0,674)</sup>. Im Meer gibt es keine Klimapunkte; ein Tipp bis etwa 15 km neben der Küste zählt für das nächste Landfeld.
-    Für den Vergleich nach jeder Runde nehmen wir die mittlere Temperatur und den mittleren Niederschlag
-    der Sommer 1991–2020 am getippten Ort (CHELSA). Den Rekord speichert nur dein Browser.</p>
+    <p>Pro Runde gibt es bis zu 5000 Punkte für den Ort, je nach Distanz deines Tipps vom Ort der Bildaufnahme: 5000 × e<sup>−Distanz / 2000 km</sup>.
+    Dazu kommen bis zu 5000 Klimapunkte: die vollen Punkte, wenn dein Tipp in einem beliebigen Analoggebiet liegt (in der Schweiz und rundherum auf 1 km genau, sonst in Blöcken von etwa 8 km, von denen
+    mindestens ein Drittel zu einem Analoggebiet gehört). Ausserhalb der Analoggebiete gibt es weniger Punkte, je stärker dein Sommer 2026 von den normalen Sommern
+    1991–2020 am getippten Ort abweicht (statistisch dieselbe Sigma-Unähnlichkeit wie oben, auf einem Raster von etwa
+    8 km, auch in den Tropen): 5000 × e<sup>−(Sigma − 0,674)</sup>. Im Meer gibt es keine Klimapunkte; ein Tipp bis etwa 15 km neben der Küste zählt für das nächste Landfeld.</p>
+    <p>Nach jeder Runde siehst du einen Vergleich des Sommers 2026 an deinem Ort mit dem mittleren Sommerklima des Ortes, den du getippt hast.
+    Dazu nehmen wir die mittlere Temperatur und den mittleren Niederschlag der Sommer 1991–2020 am getippten Ort aus den CHELSA-Daten.
+    Deinen Punkterekord speichert nur dein Browser; er wird an keinen Server übertragen.</p>
 
-    <h2>Weitere Zahlen</h2>
+    <h2>Weitere Details</h2>
     <ul>
       <li><b>Normal</b> heisst immer: Mittel der Sommer 1991–2020.</li>
       <li><b>Niederschlag:</b> Regenmesser fangen besonders im Gebirge nicht allen Niederschlag auf.
-      CHELSA ist dafür korrigiert; damit die beiden Datensätze vergleichbar sind, korrigieren wir die Werte
-      von MeteoSchweiz ebenso (etwa +5 % im Flachland bis +35 % auf 2500 m). Die Millimeter können darum
-      von den Angaben von MeteoSchweiz abweichen; der Anteil am Normalwert (in %) ist gleich.</li>
-      <li><b>Hitzetage</b> (mindestens 30 °C) zeigen wir nur zur Information; die Suche nach Analogorten
-      verwendet sie nicht. Sie schwanken stark über kurze Distanzen, und an vielen Orten gibt es in den
-      meisten Sommern keine.</li>
-      <li><b>Hitze-Trockenheitsindikator (Balkengrafik):</b> Für jeden Sommer 1961–2026 werden Temperatur und
+      Der CHELSA-Datensatz ist dafür korrigiert, der Datensatz von MeteoSchweiz nicht. Damit die beiden Datensätze vergleichbar sind, korrigieren wir die Werte
+      von MeteoSchweiz ebenso (etwa +3 bis +5 % im Flachland bis +35 % auf 2500 m). Die Angaben in Millimetern im Spiel können darum
+      von den offiziellen Angaben von MeteoSchweiz abweichen; der Anteil am Normalwert (in %) ist jedoch gleich.</li>
+      <li><b>Hitzetage</b> (Höchsttemperatur mindestens 30 °C) und <b>Tropennächte</b> (Tiefsttemperatur mindestens 20 °C)
+      zeigen wir zur Information bei den Resultaten des Spiels, weil im Sommer 2026 vielerorts in der Schweiz die bisherigen
+      Rekorde bei Weitem übertroffen wurden. Die Suche nach Analoggebieten verwendet diese Grössen nicht, denn sie schwanken stark
+      über kurze Distanzen, und an vielen Orten (zum Beispiel in höheren Lagen) gibt es in den meisten Sommern keine
+      Hitzetage oder Tropennächte.</li>
+      <li><b>Hitze-Trockenheitsindikator (Balkengrafik bei den Resultaten des Spiels):</b> Für jeden Sommer 1961–2026 werden Temperatur und
       Niederschlag mit den Sommern 1991–2020 desselben Ortes verglichen (in Standardabweichungen), gleich
       gewichtet addiert und nochmals standardisiert. Hohe Werte bedeuten heiss und niederschlagsarm.
-      Der Indikator ist relativ zum eigenen Normal jedes Ortes; gegenläufige Abweichungen gleichen sich aus;
-      er misst weder Bodenfeuchte noch Schäden und ist keine Wiederkehrperiode. Die Farben sättigen jenseits
-      von ±2,5, die Balkenhöhen zeigen die vollen Werte. Historische Ränge beziehen sich auf die Gitterdaten
-      von MeteoSchweiz (TabsM, RhiresM); mögliche Einflüsse von Veränderungen des Messnetzes wurden nicht
+      Der Indikator ist relativ zum eigenen Normalzustand jedes Ortes. Gegenläufige Abweichungen gleichen sich aus, das heisst,
+      ein sehr warmer, aber auch sehr feuchter Sommer kann als durchschnittlich erscheinen.
+      Der Indikator misst weder Bodenfeuchte noch Schäden und steht für keine Wiederkehrperiode. Die Farben sind jenseits
+      von ±2,5 Standardabweichungen gesättigt, die Balkenhöhen zeigen die vollen Werte. Der Indikator beruht auf den Gitterdaten
+      von MeteoSchweiz (TabsM, RhiresM); mögliche Einflüsse von Veränderungen des Messnetzes seit 1961 haben wir nicht
       quantifiziert.</li>
     </ul>
 
-    <h2>Grenzen</h2>
+    <h2>Einschränkungen</h2>
     <ul>
       <li><b>Ein Sommer, kein Klima:</b> Die Analoggebiete zeigen, wo ein Sommer wie 2026 heute zum Alltag gehört.
-      Das ist nicht «dein Klima der Zukunft»; die Erwärmung kann über 2026 hinausgehen.</li>
+      Das ist nicht gleichbedeutend mit «dein Klima der Zukunft»; die Erwärmung wird über 2026 hinausgehen.</li>
       <li><b>Stadt und Land:</b> Die Gitterdaten beschreiben das regionale Klima ausserhalb der Städte. In einem
       Stadtzentrum war der Sommer wahrscheinlich noch heisser, besonders in der Nacht. Wenn mindestens die Hälfte
-      des 1-km-Feldes überbaut ist (ESA WorldCover), weist die App darauf hin.</li>
+      des 1-km-Feldes, das du in der Schweiz ausgewählt hast («dein Ort»), überbaut ist (ESA WorldCover), weist die App darauf hin.</li>
       <li><b>Gebirge:</b> Über etwa 1500 m beruhen die Werte auf wenigen Messstationen. Auf Gipfeln und Graten
-      gibt es oft nur sehr kleine Analoggebiete, die wegen der 25-km²-Regel wegfallen; für solche Orte zeigen
-      wir weit entfernte oder gar keine Gebiete und keine Bilder.</li>
-      <li><b>CHELSA ist nicht überall gleich gut:</b> Im trockenen Westen der USA (z. B. Utah, Nevada) weichen die
-      Daten deutlich von Messstationen ab; Analoggebiete dort sind unsicherer. Ausserhalb Europas konnten wir
-      CHELSA nur an wenigen Stationen prüfen. Drei fehlerhafte Niederschlagsmonate von CHELSA (Juni und August
+      gibt es oft nur sehr kleine Analoggebiete, und viele davon fallen wegen der 25-km²-Regel (siehe oben) weg. Für solche Orte können
+      wir nur weit entfernte oder gar keine Gebiete und keine Bilder zeigen.</li>
+      <li><b>CHELSA ist nicht überall gleich gut:</b> Zum Beispiel im trockenen Westen der USA (z. B. Utah, Nevada) weichen die
+      Daten deutlich von Messstationen ab. Analoggebiete dort sind unsicherer. Drei fehlerhafte Niederschlagsmonate von CHELSA (Juni und August
       2015, Februar 2016) haben wir weggelassen.</li>
       <li><b>Wirkung nicht untersucht:</b> Wie solche Vergleiche auf die Wahrnehmung des Klimawandels wirken,
       haben wir nicht untersucht.</li>
@@ -107,16 +134,26 @@
 
     <h2>Quellen und Lizenzen</h2>
     <ul class="small-list">
-      <li>Klimadaten Schweiz: MeteoSchweiz (Open Government Data).</li>
+      <li>Klimadaten Schweiz: MeteoSchweiz, räumliche Klimaanalysen TabsM und RhiresM (Open Government Data;
+      <a href="https://opendatadocs.meteoswiss.ch/c-climate-data/c3-ground-based-climate-data" target="_blank" rel="noopener">opendatadocs.meteoswiss.ch</a>).</li>
       <li>Klimadaten weltweit: Karger, D. N. et al. (2017): Climatologies at high resolution for the earth's land
-      surface areas. Scientific Data 4, 170122. CHELSA V2.1, CC0.</li>
-      <li>Methode der Sigma-Unähnlichkeit: King, A. D. et al. (2024) und Mahony, C. R. et al. (2017).</li>
+      surface areas. Scientific Data 4, 170122,
+      <a href="https://doi.org/10.1038/sdata.2017.122" target="_blank" rel="noopener">doi:10.1038/sdata.2017.122</a>.
+      Daten: Karger, D. N., Brun, P., Zilker, F. (2025): CHELSA-monthly climate data at high resolution. EnviDat,
+      <a href="https://doi.org/10.16904/envidat.686" target="_blank" rel="noopener">doi:10.16904/envidat.686</a>. CHELSA V2.1, CC0.</li>
+      <li>Methode der Sigma-Unähnlichkeit: Mahony, C. R., Cannon, A. J., Wang, T., Aitken, S. N. (2017): A closer look at
+      novel climates: new methods and insights at continental to landscape scales. Global Change Biology 23, 3934–3955,
+      <a href="https://doi.org/10.1111/gcb.13645" target="_blank" rel="noopener">doi:10.1111/gcb.13645</a>.
+      King, A. D., Harrington, L. J., Hawkins, E. et al. (2024): Emergence of multivariate climate change signals.
+      Environmental Research Letters 19, 094018,
+      <a href="https://doi.org/10.1088/1748-9326/ad677f" target="_blank" rel="noopener">doi:10.1088/1748-9326/ad677f</a>.</li>
       <li>Landbedeckung: © ESA WorldCover project 2021 / Contains modified Copernicus Sentinel data (2021)
-      processed by ESA WorldCover consortium (CC BY 4.0).</li>
-      <li>Regionen und Länder: Natural Earth (gemeinfrei).</li>
+      processed by ESA WorldCover consortium (CC BY 4.0;
+      <a href="https://doi.org/10.5281/zenodo.7254221" target="_blank" rel="noopener">doi:10.5281/zenodo.7254221</a>).</li>
+      <li>Regionen und Länder: <a href="https://www.naturalearthdata.com/" target="_blank" rel="noopener">Natural Earth</a> (gemeinfrei).</li>
       <li>Karte der Schweiz und Ortssuche: ©swisstopo.</li>
       <li>Strassenbilder und Weltkarten: Google.</li>
-      <li>Kartenbibliothek: Leaflet (BSD-Lizenz).</li>
+      <li>Kartenbibliothek: <a href="https://leafletjs.com/" target="_blank" rel="noopener">Leaflet</a> (BSD-Lizenz).</li>
     </ul>
   </section>
 </body>
