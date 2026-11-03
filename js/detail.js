@@ -12,7 +12,7 @@
 import { t, withElevation } from "./i18n.js";
 import { loadGoogleMaps } from "./google.js";
 import { fetchProduct, loadRegions } from "./data.js";
-import { imagePixels, MIDDLE_MAP } from "./results.js";
+import { imagePixels, MIDDLE_MAP, makeEnlargeButton, enlargeMap } from "./results.js";
 import { climateSentence } from "./play.js";
 
 const PRODUCTS = window.APP_SETTINGS.products;
@@ -28,9 +28,6 @@ const CLASS_COLOURS = {
 };
 const LEGEND_ORDER = ["analogue", "warmerWetter", "warmerDrier", "coolerWetter", "coolerDrier"];
 
-// The map shows the world down to 85° S (Google's map ends there).
-const SOUTH_LIMIT = -85;
-
 // Map style: as the results map, but white land, so that the sand grey of «cooler and drier»
 // does not look like the map's own (uncoloured) land.
 const DETAIL_MAP = [
@@ -38,19 +35,13 @@ const DETAIL_MAP = [
   { featureType: "landscape", elementType: "geometry", stylers: [{ color: "#ffffff" }] }
 ];
 
-// West edges of the three map pieces of 120° (see drawDetailMap).
-const PIECE_WEST_EDGES = [-170, -50, 70];
-const PIECE_DEGREES = 120;
-
-// Overlap of neighbouring pieces (cells of 16 km; 4 cells are about 1.5 pixels at zoom 2) and
-// the transparency of each piece there: with the overlay opacity o = 0.85, two layers of
-// alpha a cover 1 - (1 - o a)^2, which equals o for a = (1 - sqrt(1 - o)) / o = 0.72.
-const OVERLAY_OPACITY = 0.85;
-const OVERLAP_CELLS = 4;
-const OVERLAP_ALPHA = Math.round(255 * (1 - Math.sqrt(1 - OVERLAY_OPACITY)) / OVERLAY_OPACITY);
+// Transparency of the colours, so that borders and labels of the map still show faintly.
+const OVERLAY_ALPHA = Math.round(255 * 0.85);
+// Class numbers in the class grid (0 = sea or no data).
+const CLASS_NUMBERS = { analogue: 1, warmerWetter: 2, warmerDrier: 3, coolerWetter: 4, coolerDrier: 5 };
 
 let detailMap = null;            // made once, reused
-let mapObjects = [];             // overlays and markers of the last detail map
+let mapObjects = [];             // markers and lines of the last detail map
 let panorama = null;             // the Street View panorama that is open, if any
 let climateGrid = null;          // { index, t, p }: decoded once per visit
 
@@ -120,7 +111,10 @@ async function drawDetailMap(place, game) {
       gestureHandling: "cooperative",
       styles: DETAIL_MAP
     });
+    // «Karte vergrössern» as on the results map (user, 2026-11-03).
+    detailMap.controls[google.maps.ControlPosition.TOP_RIGHT].push(makeEnlargeButton(box));
   }
+  enlargeMap(box, false);
   // The map box was hidden until now: tell Google its size, then set the view (as the
   // reveal map of play.js, where a map in a box that was hidden sometimes stayed grey). A
   // timeout instead of requestAnimationFrame, which does not fire while the page is not drawn.
@@ -131,19 +125,18 @@ async function drawDetailMap(place, game) {
   for (const object of mapObjects) object.setMap(null);
   mapObjects = [];
 
-  // The five classes as three image overlays of 120° each. Google cannot stretch one image over
-  // the whole 360°, and an image whose edge lies at ±180° was drawn one world further east,
-  // outside the view (test 2026-11-03); so the edges are at 170° W, 50° W and 70° E, and the
-  // third piece crosses the date line (west 70°, east -170°), which Google handles.
+  // The five classes as map tiles that are coloured in the browser (ClassTiles below). Before,
+  // the classes were three image overlays of 120°; Google sometimes drew one of them in the
+  // wrong copy of the world, so that a part of the map stayed white until it was moved, and a
+  // thin line showed between the pieces (user, 2026-11-03). Tiles are drawn by Google for
+  // exactly the part of the map that is visible.
   const bundleNumber = place.cell.bundle;
   const bundle = await fetchProduct("bundles/bundle_" + String(bundleNumber).padStart(5, "0") + ".json");
   const grid = await loadClimateGrid();
   const analogue = await analogueCells(grid.index, bundle);
-  for (const westEdge of PIECE_WEST_EDGES) {
-    const image = classImage(grid, analogue, place.cell, westEdge);
-    mapObjects.push(new google.maps.GroundOverlay(image.url, image.bounds,
-                                                  { map: detailMap, clickable: false, opacity: OVERLAY_OPACITY }));
-  }
+  const classes = classGrid(grid, analogue, place.cell);
+  detailMap.overlayMapTypes.clear();
+  detailMap.overlayMapTypes.push(new ClassTiles(grid.index, classes));
 
   // The place itself, the image locations (green) and the guesses (grey), numbered by round.
   mapObjects.push(new google.maps.Marker({ position: { lat: place.lat, lng: place.lon }, map: detailMap,
@@ -170,7 +163,9 @@ function showRoundOnMap(result) {
   bounds.extend({ lat: result.pano.lat, lng: result.pano.lon });
   bounds.extend({ lat: result.guess.lat, lng: result.guess.lon });
   detailMap.fitBounds(bounds, 60);
-  document.getElementById("detail-map").scrollIntoView({ behavior: "smooth", block: "center" });
+  const box = document.getElementById("detail-map");
+  if (box.classList.contains("enlarged")) return;     // already fills the window
+  box.scrollIntoView({ behavior: "smooth", block: "center" });
 }
 
 function numberIcon(colour) {
@@ -236,60 +231,87 @@ async function analogueCells(index, bundle) {
   return analogue;
 }
 
-// One piece of the world (120° from westEdge eastwards, across the date line if needed) as
-// an image: each 16 km cell gets the colour of its class compared with the place's summer 2026
-// (the cell's numbers, as the sentences of the rounds), land only (sea transparent).
-// Returns { url, bounds } for a Google GroundOverlay.
-function classImage(grid, analogue, cell, westEdge) {
-  const index = grid.index;
-  // The pieces overlap by a few cells: Google rounds the position of each image on its own,
-  // and without the overlap a thin white line showed between the pieces (user, 2026-11-03;
-  // 0.3 pixels at zoom 2 with one cell of overlap). In the overlap both pieces are drawn
-  // half transparent (OVERLAP_ALPHA), so that together they cover as much as one piece and the
-  // strip does not look darker.
-  const baseColumns = Math.round(PIECE_DEGREES / index.resolution);
-  const pieceColumns = baseColumns + OVERLAP_CELLS;
-  const firstColumn = Math.round((westEdge - index.west) / index.resolution);
-  const rows = Math.floor((index.north - SOUTH_LIMIT) / index.resolution);
-
-  const canvas = document.createElement("canvas");
-  canvas.width = pieceColumns;
-  canvas.height = rows;
-  const context = canvas.getContext("2d");
-  const image = context.createImageData(pieceColumns, rows);
-  for (let row = 0; row < rows; row++) {
-    for (let x = 0; x < pieceColumns; x++) {
-      const column = (firstColumn + x) % index.columns;      // past 180° E: on from 180° W
-      const gridCell = row * index.columns + column;
-      const meanT = grid.t[gridCell];
-      if (Number.isNaN(meanT)) continue;                  // sea: stays transparent
-      let colour;
-      if (analogue[gridCell] === 1) {
-        colour = CLASS_COLOURS.analogue;
-      } else {
-        const warmer = meanT > cell.t_2026;
-        const wetter = grid.p[gridCell] > cell.p_2026;
-        if (warmer) colour = wetter ? CLASS_COLOURS.warmerWetter : CLASS_COLOURS.warmerDrier;
-        else colour = wetter ? CLASS_COLOURS.coolerWetter : CLASS_COLOURS.coolerDrier;
-      }
-      const pixel = (row * pieceColumns + x) * 4;
-      image.data[pixel] = colour[0];
-      image.data[pixel + 1] = colour[1];
-      image.data[pixel + 2] = colour[2];
-      const inOverlap = x < OVERLAP_CELLS || x >= baseColumns;
-      image.data[pixel + 3] = inOverlap ? OVERLAP_ALPHA : 255;
+// The class of every 16 km cell compared with the place's summer 2026 (the cell's numbers, as
+// the sentences of the rounds): Uint8Array with the numbers of CLASS_NUMBERS, 0 = sea.
+function classGrid(grid, analogue, cell) {
+  const classes = new Uint8Array(grid.t.length);
+  for (let gridCell = 0; gridCell < grid.t.length; gridCell++) {
+    const meanT = grid.t[gridCell];
+    if (Number.isNaN(meanT)) continue;                    // sea: stays 0
+    if (analogue[gridCell] === 1) {
+      classes[gridCell] = CLASS_NUMBERS.analogue;
+      continue;
     }
+    const warmer = meanT > cell.t_2026;
+    const wetter = grid.p[gridCell] > cell.p_2026;
+    if (warmer) classes[gridCell] = wetter ? CLASS_NUMBERS.warmerWetter : CLASS_NUMBERS.warmerDrier;
+    else classes[gridCell] = wetter ? CLASS_NUMBERS.coolerWetter : CLASS_NUMBERS.coolerDrier;
   }
-  context.putImageData(image, 0, 0);
-  // Edges of the cells actually drawn (the grid starts at 180.0001° W), as longitudes
-  // between -180 and 180.
-  const west = index.west + firstColumn * index.resolution;
-  let east = west + pieceColumns * index.resolution;
-  if (east > 180) east -= 360;
-  return {
-    url: canvas.toDataURL("image/png"),
-    bounds: { north: index.north, south: index.north - rows * index.resolution, west: west, east: east }
-  };
+  return classes;
+}
+
+// Map tiles of 256 x 256 pixels for Google's overlayMapTypes. Google asks for the tiles that
+// are visible (in every copy of the world), and each pixel gets the colour of the 16 km cell
+// under it: the pixel's position in Google's map projection (Web Mercator) is turned into
+// longitude and latitude, then into the row and column of the grid.
+class ClassTiles {
+  constructor(index, classes) {
+    this.tileSize = new google.maps.Size(256, 256);
+    this.index = index;
+    this.classes = classes;
+    // Colour of each class number as [red, green, blue].
+    this.colours = [null];
+    for (const name of Object.keys(CLASS_NUMBERS)) this.colours[CLASS_NUMBERS[name]] = CLASS_COLOURS[name];
+  }
+
+  getTile(coord, zoom, ownerDocument) {
+    const index = this.index;
+    const tiles = 2 ** zoom;                             // tiles across the world at this zoom
+    const tileX = ((coord.x % tiles) + tiles) % tiles;   // copies of the world: same tile
+    const worldPixels = 256 * tiles;
+
+    // Grid column of each pixel column of the tile, and grid row of each pixel row (-1 =
+    // outside the grid).
+    const columns = new Int32Array(256);
+    for (let x = 0; x < 256; x++) {
+      const lon = (tileX * 256 + x + 0.5) / worldPixels * 360 - 180;
+      const column = Math.floor((lon - index.west) / index.resolution);
+      columns[x] = ((column % index.columns) + index.columns) % index.columns;
+    }
+    const rows = new Int32Array(256);
+    for (let y = 0; y < 256; y++) {
+      const mercatorY = Math.PI * (1 - 2 * (coord.y * 256 + y + 0.5) / worldPixels);
+      const lat = Math.atan(Math.sinh(mercatorY)) * 180 / Math.PI;
+      const row = Math.floor((index.north - lat) / index.resolution);
+      rows[y] = row >= 0 && row < index.rows ? row : -1;
+    }
+
+    const canvas = ownerDocument.createElement("canvas");
+    canvas.width = 256;
+    canvas.height = 256;
+    canvas.style.imageRendering = "pixelated";           // sharp cell edges when zoomed in
+    if (coord.y < 0 || coord.y >= tiles) return canvas;  // above or below the world: empty
+    const context = canvas.getContext("2d");
+    const image = context.createImageData(256, 256);
+    for (let y = 0; y < 256; y++) {
+      if (rows[y] < 0) continue;
+      const rowStart = rows[y] * index.columns;
+      for (let x = 0; x < 256; x++) {
+        const classNumber = this.classes[rowStart + columns[x]];
+        if (classNumber === 0) continue;                 // sea: transparent
+        const colour = this.colours[classNumber];
+        const pixel = (y * 256 + x) * 4;
+        image.data[pixel] = colour[0];
+        image.data[pixel + 1] = colour[1];
+        image.data[pixel + 2] = colour[2];
+        image.data[pixel + 3] = OVERLAY_ALPHA;
+      }
+    }
+    context.putImageData(image, 0, 0);
+    return canvas;
+  }
+
+  releaseTile() {}
 }
 
 

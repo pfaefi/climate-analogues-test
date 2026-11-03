@@ -330,8 +330,9 @@ button.secondary-button {
 }
 .detail-legend .dot + span { margin-right: 14px; }
 /* The class layers as sharp 16 km cells (Google smooths image overlays) */
-#detail-map img[src^="data:"] { image-rendering: pixelated; }
-.detail-notes { color: var(--muted); font-size: 0.85rem; padding-left: 18px; margin: 10px 0 0; }
+.detail-notes { color: var(--muted); font-size: 0.85rem; margin: 10px 0 0; }
+.detail-notes summary { cursor: pointer; color: var(--accent-dark); }
+.detail-notes ul { padding-left: 18px; margin: 6px 0 0; }
 .detail-notes li { margin-bottom: 4px; }
 
 .detail-rounds { padding-left: 0; list-style: none; }
@@ -343,7 +344,9 @@ button.secondary-button {
   border-radius: 10px;
 }
 .round-title { font-weight: 700; margin: 0; }
-.round-points { color: var(--muted); font-size: 0.9rem; margin: 2px 0 6px; }
+/* Points line and climate sentence in the same small type (user, 2026-11-03). */
+.round-points, .round-climate { color: var(--muted); font-size: 0.9rem; }
+.round-points { margin: 2px 0 4px; }
 .round-climate { margin: 0 0 8px; }
 .round-actions { margin: 0; display: flex; flex-wrap: wrap; gap: 8px; }
 button.small-button {

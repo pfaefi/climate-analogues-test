@@ -146,9 +146,9 @@ async function drawMap(place, bundle, game) {
       gestureHandling: "cooperative",    // on phones: two fingers move the map, one scrolls the page
       styles: MIDDLE_MAP                 // grey land, blue water: the orange areas stand out
     });
-    resultsMap.controls[google.maps.ControlPosition.TOP_RIGHT].push(makeEnlargeButton());
+    resultsMap.controls[google.maps.ControlPosition.TOP_RIGHT].push(makeEnlargeButton(document.getElementById("results-map")));
   }
-  enlargeMap(false);
+  enlargeMap(document.getElementById("results-map"), false);
   resultsMap.setCenter({ lat: 25, lng: 10 });
   resultsMap.setZoom(narrow ? 1 : 2);
   for (const object of mapObjects) object.setMap(null);
@@ -313,26 +313,26 @@ export const MIDDLE_MAP = [
   { featureType: "poi", stylers: [{ visibility: "off" }] }
 ];
 
-// Button on the map that enlarges it to the whole window and back (Escape also shrinks it).
-function makeEnlargeButton() {
+// Button on a map that enlarges the map box to the whole window and back (Escape also
+// shrinks it). Used by the results map and the detail map (detail.js).
+export function makeEnlargeButton(box) {
   const button = document.createElement("button");
   button.type = "button";
-  button.id = "map-size-button";
   button.className = "map-size-button";
   button.textContent = t("map_enlarge");
   button.addEventListener("click", () => {
-    enlargeMap(!document.getElementById("results-map").classList.contains("enlarged"));
+    enlargeMap(box, !box.classList.contains("enlarged"));
   });
   document.addEventListener("keydown", event => {
-    if (event.key === "Escape") enlargeMap(false);
+    if (event.key === "Escape" && box.classList.contains("enlarged")) enlargeMap(box, false);
   });
   return button;
 }
 
-function enlargeMap(enlarged) {
-  document.getElementById("results-map").classList.toggle("enlarged", enlarged);
+export function enlargeMap(box, enlarged) {
+  box.classList.toggle("enlarged", enlarged);
   document.body.classList.toggle("map-enlarged", enlarged);   // the page behind must not scroll
-  const button = document.getElementById("map-size-button");
+  const button = box.querySelector(".map-size-button");
   if (button !== null) button.textContent = t(enlarged ? "map_shrink" : "map_enlarge");
 }
 

@@ -147,12 +147,16 @@
     <ul id="detail-legend" class="detail-legend"></ul>
     <div id="detail-map" class="results-map"></div>
     <p id="detail-map-status" class="results-note"></p>
-    <ul class="detail-notes">
-      <li data-text="detail_note_borders"></li>
-      <li data-text="detail_note_analogue"></li>
-      <li data-text="detail_note_tropics"></li>
-      <li data-text="detail_note_data"></li>
-    </ul>
+    <!-- The notes are folded away below the map (user, 2026-11-03). -->
+    <details class="detail-notes">
+      <summary data-text="detail_notes_title"></summary>
+      <ul>
+        <li data-text="detail_note_borders"></li>
+        <li data-text="detail_note_analogue"></li>
+        <li data-text="detail_note_tropics"></li>
+        <li data-text="detail_note_data"></li>
+      </ul>
+    </details>
 
     <div id="detail-rounds-box">
       <h2 data-text="detail_rounds_title"></h2>
