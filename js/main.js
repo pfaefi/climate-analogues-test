@@ -1,10 +1,11 @@
-// The app: three screens (start, play, results; app_plan.md §10). Only one is visible at a
-// time.
+// The app: three screens (start, play, results; app_plan.md §10) and the detail screen of the
+// results (js/detail.js). Only one is visible at a time.
 
 import { loadTexts, fillTexts, t } from "./i18n.js";
 import { initStart, refreshStartMap } from "./start.js";
 import { startPlay } from "./play.js";
 import { showResultsScreen } from "./results.js";
+import { showDetailScreen } from "./detail.js";
 import { surveyBeforeGame, surveyAfterGame } from "./survey.js";
 import { sendEvent } from "./events.js";
 import { offerLogDownload } from "./memory.js";
@@ -12,6 +13,7 @@ import { initPages } from "./pages.js";
 import { drawBanner } from "./banner.js";
 
 let currentPlace = null;      // the place of the last game or results (for «Nochmals spielen»)
+let currentGame = null;       // the last game (null if skipped), for the detail screen
 let currentScreen = "start";  // the visible screen (a text page returns to it)
 
 function showScreen(name) {
@@ -47,9 +49,23 @@ async function startGame(place) {
   });
 }
 
+// «Resultate im Detail» and back to the results, scrolled to the button that opened it.
+function showDetail() {
+  sendEvent("detail_shown", { bundle: currentPlace.cell.bundle, after_game: currentGame !== null });
+  showScreen("detail");
+  showDetailScreen(currentPlace, currentGame);
+}
+
+function backToResults(event) {
+  if (event) event.preventDefault();
+  showScreen("results");
+  document.getElementById("detail-button").scrollIntoView({ block: "center" });
+}
+
 // Results screen; game is null when the game was skipped.
 function showResults(place, game = null) {
   currentPlace = place;
+  currentGame = game;
   sendEvent("results_shown", { bundle: place.cell.bundle, after_game: game !== null });
   showScreen("results");
   showResultsScreen(place, game);
@@ -69,6 +85,9 @@ async function main() {
   exit.setAttribute("aria-label", t("play_exit"));
   exit.title = t("play_exit");
   document.getElementById("play-again").addEventListener("click", () => startGame(currentPlace));
+  document.getElementById("detail-button").addEventListener("click", showDetail);
+  document.getElementById("detail-back").addEventListener("click", backToResults);
+  document.getElementById("detail-back-button").addEventListener("click", backToResults);
   initPages(showScreen, () => currentScreen);
   offerLogDownload();
   showScreen("start");

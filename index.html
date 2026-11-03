@@ -110,6 +110,7 @@
     <div id="results-map" class="results-map"></div>
     <p id="results-nearest" class="results-nearest"></p>
     <p class="results-note" data-text="results_tropics"></p>
+    <button id="detail-button" class="secondary-button" type="button" data-text="detail_open"></button>
 
     <div id="stripes-box">
       <h2 id="stripes-title"></h2>
@@ -132,6 +133,33 @@
       <a href="methods.html" data-text="link_methods"></a>
       <a href="about.html" data-text="link_about"></a>
     </footer>
+  </section>
+
+  <!-- Results in detail (js/detail.js): the normal summer climate of the world compared with
+       the summer 2026 of the place, and the five rounds -->
+  <section id="screen-detail" class="screen screen-results" hidden>
+    <p><a id="detail-back" class="detail-back" href="#" data-text="detail_back"></a></p>
+    <p class="results-kicker" data-text="detail_kicker"></p>
+    <h1 id="detail-place"></h1>
+
+    <h2 data-text="detail_map_title"></h2>
+    <p id="detail-map-intro" class="detail-intro"></p>
+    <ul id="detail-legend" class="detail-legend"></ul>
+    <div id="detail-map" class="results-map"></div>
+    <p id="detail-map-status" class="results-note"></p>
+    <ul class="detail-notes">
+      <li data-text="detail_note_borders"></li>
+      <li data-text="detail_note_analogue"></li>
+      <li data-text="detail_note_tropics"></li>
+      <li data-text="detail_note_data"></li>
+    </ul>
+
+    <div id="detail-rounds-box">
+      <h2 data-text="detail_rounds_title"></h2>
+      <ol id="detail-rounds" class="detail-rounds"></ol>
+    </div>
+
+    <button id="detail-back-button" class="secondary-button" type="button" data-text="detail_back_button"></button>
   </section>
 
   <!-- Text pages (info, methods, about) shown inside the app, so that «Zurück» returns to the

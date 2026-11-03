@@ -8,7 +8,7 @@
 
 import { t, withElevation } from "./i18n.js";
 import { loadGoogleMaps } from "./google.js";
-import { loadBundle, loadRegions, loadStripes, isUrban } from "./data.js";
+import { loadBundle, loadRegions, loadStripes, isUrban, loadImage } from "./data.js";
 import { drawStripes } from "./stripes.js";
 import { updateRecord } from "./memory.js";
 
@@ -280,10 +280,8 @@ async function gridDots(images, cellKms) {
 }
 
 // The RGBA pixels of an image (same origin, so the canvas may be read).
-async function imagePixels(url) {
-  const image = new Image();
-  image.src = url;
-  await image.decode();
+export async function imagePixels(url) {
+  const image = await loadImage(url);
   const canvas = document.createElement("canvas");
   canvas.width = image.naturalWidth;
   canvas.height = image.naturalHeight;
@@ -304,7 +302,7 @@ const GREY_MAP = [
 
 // Middle way (app_test_notes 29.10 point 3): light grey land without vegetation colours, but
 // light blue water and clearer country borders, so that the map looks less washed out.
-const MIDDLE_MAP = [
+export const MIDDLE_MAP = [
   { featureType: "landscape", elementType: "geometry", stylers: [{ color: "#eeedea" }] },
   { featureType: "water", elementType: "geometry", stylers: [{ color: "#bfd8ea" }] },
   { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#5d7f99" }] },

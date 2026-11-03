@@ -297,6 +297,66 @@ body.map-enlarged { overflow: hidden; }
    the 8 km blocks looked larger than they are; user's test 2026-10-30) */
 .results-map img[src*="maps/bundle_"] { image-rendering: pixelated; }
 
+/* Button to the detail screen and back (white, like «Anderen Ort wählen») */
+button.secondary-button {
+  display: block;
+  margin: 16px 0 0;
+  font: inherit;
+  font-weight: 700;
+  padding: 10px 14px;
+  color: var(--accent-dark);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card);
+  cursor: pointer;
+}
+
+
+/* ---------------------------------------------------------------------------------
+   Detail screen (js/detail.js)
+   --------------------------------------------------------------------------------- */
+
+.detail-back { color: var(--accent-dark); }
+.detail-intro { margin: 0 0 8px; }
+.detail-legend { list-style: none; padding: 0; margin: 0 0 10px; font-size: 0.9rem; line-height: 1.4; }
+.detail-legend li { margin: 0 0 4px; }
+.detail-legend .swatch {
+  display: inline-block; width: 14px; height: 14px; margin: 0 6px -2px 0; border-radius: 3px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+}
+.detail-legend .dot {
+  display: inline-block; width: 14px; height: 14px; margin: 0 4px -2px 0; border-radius: 50%;
+  border: 2px solid #fff; box-shadow: 0 0 0 1px #bbb;
+}
+.detail-legend .dot + span { margin-right: 14px; }
+/* The class layers as sharp 16 km cells (Google smooths image overlays) */
+#detail-map img[src^="data:"] { image-rendering: pixelated; }
+.detail-notes { color: var(--muted); font-size: 0.85rem; padding-left: 18px; margin: 10px 0 0; }
+.detail-notes li { margin-bottom: 4px; }
+
+.detail-rounds { padding-left: 0; list-style: none; }
+.detail-round {
+  margin: 0 0 12px;
+  padding: 10px 14px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.round-title { font-weight: 700; margin: 0; }
+.round-points { color: var(--muted); font-size: 0.9rem; margin: 2px 0 6px; }
+.round-climate { margin: 0 0 8px; }
+.round-actions { margin: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+button.small-button {
+  font: inherit;
+  font-size: 0.9rem;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+}
+.round-panorama { height: 300px; margin-top: 10px; border-radius: 8px; overflow: hidden; }
+
 /* Stripes graphic (SVG from js/stripes.js) */
 .stripes-subtitle { color: var(--muted); font-size: 0.9rem; margin: -6px 0 6px; }
 .stripes-svg { width: 100%; height: auto; display: block; }

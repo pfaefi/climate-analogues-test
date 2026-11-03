@@ -18,6 +18,18 @@ export function fetchProduct(path) {
   return cache.get(path);
 }
 
+// An image, loaded (resolves on the image's load event). image.decode() would also do, but in
+// some browsers its promise never settled although the image had loaded (the browser pane of
+// the Claude app, 2026-11-03), so the plain load event is used.
+export function loadImage(url) {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error("Image could not be loaded: " + url));
+    image.src = url;
+  });
+}
+
 // The numbers of the Zielort cell at a point (script 27: one row per cell, in tiles).
 // Returns { status: "ok", cell: {...} } or { status: "outside" }.
 export async function loadCell(lon, lat) {
@@ -88,6 +100,50 @@ export async function loadStripes(cell) {
     years: series.map((value, k) => tile.first_year + k),
     values: series.map(value => value / tile.multiplier)
   };
+}
+
+// The region (region_id of the region names) at a point anywhere on land, from the tiles of
+// script 44 (Natural Earth admin-1 on a grid of 1/30°, about 3.7 km; region_id = red * 256 +
+// green, 0 = sea). If the cell itself has no region (a tap just off the coast, a small island
+// the grid misses), the nearest cell with a region within 3 cells (about 11 km) is used.
+// Returns the region_id or null (sea).
+const regionTiles = new Map();     // tile name -> RGBA pixels (loaded once)
+
+export async function regionAt(lon, lat) {
+  const index = await fetchProduct("regions_grid/index.json");
+  const row = Math.floor((index.north - lat) / index.resolution);
+  const column = Math.floor((lon - index.west) / index.resolution);
+  const offsets = [];
+  for (let dr = -3; dr <= 3; dr++) {
+    for (let dc = -3; dc <= 3; dc++) offsets.push([dr, dc]);
+  }
+  offsets.sort((a, b) => (a[0] ** 2 + a[1] ** 2) - (b[0] ** 2 + b[1] ** 2));   // nearest first
+  for (const [dr, dc] of offsets) {
+    const region = await regionOfCell(index, row + dr, column + dc);
+    if (region !== null) return region;
+  }
+  return null;
+}
+
+async function regionOfCell(index, row, column) {
+  if (row < 0 || column < 0) return null;
+  const tileRow = Math.floor(row / index.tile_cells);
+  const tileColumn = Math.floor(column / index.tile_cells);
+  const name = String(tileRow).padStart(2, "0") + "_" + String(tileColumn).padStart(2, "0");
+  if (!index.tiles.includes(name)) return null;                 // a tile without land
+  if (!regionTiles.has(name)) {
+    const image = await loadImage(PRODUCTS + "regions_grid/tile_" + name + ".png");
+    const canvas = document.createElement("canvas");
+    canvas.width = image.naturalWidth;
+    canvas.height = image.naturalHeight;
+    const context = canvas.getContext("2d", { willReadFrequently: true });
+    context.drawImage(image, 0, 0);
+    regionTiles.set(name, context.getImageData(0, 0, canvas.width, canvas.height).data);
+  }
+  const pixels = regionTiles.get(name);
+  const position = ((row % index.tile_cells) * index.tile_cells + (column % index.tile_cells)) * 4;
+  const region = pixels[position] * 256 + pixels[position + 1];
+  return region === 0 ? null : region;
 }
 
 // Names of all regions in the language of the app (script 31, about 145 kB), as a Map

@@ -6,7 +6,7 @@
 // the guessed place's mean and covariance, converted to sigma with the F distribution.
 // The statistics come from script 40 as tiles of 5° x 5° (8 km cells, incl. the tropics).
 
-import { fetchProduct } from "./data.js";
+import { fetchProduct, loadImage } from "./data.js";
 
 const PRODUCTS = window.APP_SETTINGS.products;
 const tiles = new Map();       // tile name -> Int16Array (loaded once)
@@ -169,10 +169,7 @@ function covers(image, lon, lat) {
 // the Swiss 1 km image has class 3 only). A 1 x 1 canvas; each image is decoded once.
 async function pixelClass(image, lon, lat) {
   if (!images.has(image.file)) {
-    const element = new Image();
-    element.src = PRODUCTS + "maps/" + image.file;
-    await element.decode();
-    images.set(image.file, element);
+    images.set(image.file, await loadImage(PRODUCTS + "maps/" + image.file));
   }
   const element = images.get(image.file);
   const x = Math.floor((lon - image.west) / (image.east - image.west) * element.naturalWidth);

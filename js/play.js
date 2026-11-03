@@ -11,7 +11,7 @@
 
 import { t } from "./i18n.js";
 import { loadGoogleMaps } from "./google.js";
-import { loadPool, loadRegions, loadBundle } from "./data.js";
+import { loadPool, loadRegions, loadBundle, regionAt } from "./data.js";
 import { sendEvent } from "./events.js";
 import { shownImages, rememberGame } from "./memory.js";
 import { climateOfGuess } from "./climate.js";
@@ -219,8 +219,15 @@ async function confirmGuess() {
     console.error(error);
     climate = { points: 0, failed: true };
   }
+  // The region of the guess, named in the climate sentence (user, 2026-11-03).
+  let guessRegionId = null;
+  try {
+    guessRegionId = await regionAt(guess.lng(), guess.lat());
+  } catch (error) {
+    console.error(error);
+  }
   const result = { pano: pano, guess: { lat: guess.lat(), lon: guess.lng() }, distance: distance,
-                   points: points, climate: climate };
+                   points: points, climate: climate, guessRegionId: guessRegionId };
   game.results.push(result);
   // For a possible analysis of what people think the analogues are (§10 point 5): the
   // guess rounded to 0.1 degree, the panorama and the distance; nothing about the person.
@@ -289,7 +296,7 @@ function showReveal(result) {
     t("reveal_distance", { km: formatNumber(Math.round(result.distance)), points: pointsText(result.points) });
   document.getElementById("reveal-climate").textContent =
     t("reveal_climate_points", { points: pointsText(result.climate.points) });
-  document.getElementById("reveal-climate-text").textContent = climateText(result.climate);
+  document.getElementById("reveal-climate-text").textContent = climateText(result);
   document.getElementById("reveal-place").textContent = t("reveal_place", {
     place: regionName(result.pano.region_id), date: formatDate(result.pano.date), home: game.place.phrase
   });
@@ -352,12 +359,18 @@ function totalPoints() {
 // deinem Sommer 2026 in Zürich (ZH): 1.8 °C kühler, 35 % feuchter." The comparison is with the
 // place's own summer 2026 (the numbers of the results screen); differences below 0.5 °C or
 // 10 % count as "about the same".
-function climateText(climate) {
+function climateText(result) {
+  return climateSentence(result.climate, game.place, regionName(result.guessRegionId));
+}
+
+// The same sentence for any place (also used on the detail screen, js/detail.js). guessRegion:
+// name of the region of the guess («Bayern, Deutschland»), or "?" / null if unknown.
+export function climateSentence(climate, place, guessRegion = null) {
   if (climate.failed) return "";
   if (climate.sea) return t("reveal_climate_sea");
   if (climate.meanT === undefined) return t("reveal_climate_area");   // orange area without 8 km data
 
-  const cell = game.place.cell;
+  const cell = place.cell;
   const differenceT = climate.meanT - cell.t_2026;
   const differenceP = (climate.meanP / cell.p_2026 - 1) * 100;
   let warmth = t("climate_same_t");
@@ -366,7 +379,8 @@ function climateText(climate) {
   let wetness = t("climate_same_p");
   if (differenceP >= 10) wetness = t("climate_wetter", { value: formatNumber(Math.round(differenceP)) });
   if (differenceP <= -10) wetness = t("climate_drier", { value: formatNumber(Math.round(-differenceP)) });
-  let text = t("reveal_climate_compare", { warmth: warmth, wetness: wetness, home: game.place.phrase });
+  const region = guessRegion === null || guessRegion === "?" ? "" : " (" + guessRegion + ")";
+  let text = t("reveal_climate_compare", { warmth: warmth, wetness: wetness, home: place.phrase, region: region });
   if (climate.inArea) text += " " + t("reveal_climate_in_area");
   return text;
 }
