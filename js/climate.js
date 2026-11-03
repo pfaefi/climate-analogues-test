@@ -37,6 +37,24 @@ export async function climateOfGuess(bundle, lon, lat) {
 }
 
 
+// The normal summer at a guess compared with the place's summer 2026 (the cell's numbers):
+// differences below 0.5 °C or 10 % count as "about the same". Used by the sentence of each
+// round (play.js) and the summary of the game (results.js).
+// Returns { differenceT, differenceP (in %), t: "warmer" / "cooler" / "same",
+// p: "wetter" / "drier" / "same" }, or null where the guess has no climate data.
+export function climateDirection(climate, cell) {
+  if (climate.failed || climate.sea || climate.meanT === undefined) return null;
+  const differenceT = climate.meanT - cell.t_2026;
+  const differenceP = (climate.meanP / cell.p_2026 - 1) * 100;
+  let t = "same";
+  if (differenceT >= 0.5) t = "warmer";
+  if (differenceT <= -0.5) t = "cooler";
+  let p = "same";
+  if (differenceP >= 10) p = "wetter";
+  if (differenceP <= -10) p = "drier";
+  return { differenceT: differenceT, differenceP: differenceP, t: t, p: p };
+}
+
 // ---------------------------------------------------------------------------------
 // Statistics at a point (tiles of script 40)
 // ---------------------------------------------------------------------------------

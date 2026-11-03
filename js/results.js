@@ -11,6 +11,7 @@ import { loadGoogleMaps } from "./google.js";
 import { loadBundle, loadRegions, loadStripes, isUrban, loadImage } from "./data.js";
 import { drawStripes } from "./stripes.js";
 import { updateRecord } from "./memory.js";
+import { climateDirection } from "./climate.js";
 
 const PRODUCTS = window.APP_SETTINGS.products;
 let resultsMap = null;          // made once, reused
@@ -24,6 +25,7 @@ export async function showResultsScreen(place, game) {
   fillNumbers(cell);
   document.getElementById("results-urban").hidden = !isUrban(cell);
   fillScore(game);
+  fillSummary(place, game);
   document.getElementById("play-again").hidden = place.panoramas.length === 0;
 
   // The parts that need more data are filled when the data have arrived.
@@ -101,6 +103,67 @@ function fillScore(game) {
     record.textContent = t("results_record", { points: formatNumber(previous.points), place: previous.place,
                                                date: formatDate(previous.date) });
   }
+}
+
+// One sentence on the guesses of the game (user, 2026-11-03; app_plan.md §20). Four cases,
+// checked in this order, so that exactly one sentence is shown:
+// 1. at least 3 guesses in an orange analogue area ("hits"): «Gut gemacht! …»;
+// 2. fewer than 4 rounds with climate data (guesses in the sea): too few for a summary;
+// 3. at least 4 guesses at places where a normal summer is warmer (or cooler), and / or
+//    drier (or wetter), than the place's summer 2026: the tendency, only for the variable(s)
+//    that have one (hits count for no direction; thresholds as in the round sentences);
+// 4. otherwise: no clear tendency.
+function fillSummary(place, game) {
+  const summary = document.getElementById("results-summary");
+  summary.hidden = game === null;
+  if (game !== null) summary.textContent = summaryText(place, game);
+}
+
+// The sentence itself (exported for tests in the browser console).
+export function summaryText(place, game) {
+  const rounds = game.results.length;
+
+  // Count hits, rounds with climate data and the directions of the other guesses.
+  let hits = 0;
+  let withData = 0;
+  const counts = { warmer: 0, cooler: 0, wetter: 0, drier: 0 };
+  for (const result of game.results) {
+    const climate = result.climate;
+    if (climate.failed || climate.sea) continue;
+    withData += 1;
+    if (climate.inArea) {
+      hits += 1;
+      continue;
+    }
+    const direction = climateDirection(climate, place.cell);
+    if (direction === null) continue;
+    if (direction.t !== "same") counts[direction.t] += 1;
+    if (direction.p !== "same") counts[direction.p] += 1;
+  }
+
+  if (hits >= 3) return t("summary_hits", { hits: hits, rounds: rounds });
+  if (withData < 4) return t("summary_too_few");
+
+  // Tendency of temperature and of precipitation (null = none).
+  let tendencyT = null;
+  if (counts.warmer >= 4) tendencyT = "warmer";
+  if (counts.cooler >= 4) tendencyT = "cooler";
+  let tendencyP = null;
+  if (counts.drier >= 4) tendencyP = "drier";
+  if (counts.wetter >= 4) tendencyP = "wetter";
+  if (tendencyT === null && tendencyP === null) return t("summary_neutral");
+
+  // "immer" if every tendency that is named holds in all rounds, else "meist".
+  const named = [tendencyT, tendencyP].filter(name => name !== null);
+  const always = named.every(name => counts[name] === rounds);
+  // e.g. "wärmer und trockener", and the key of the second sentence, e.g. "warmer_drier".
+  const direction = named.map(name => t("summary_direction_" + name)).join(" " + t("summary_and") + " ");
+  return t("summary_tendency", {
+    often: t(always ? "summary_always" : "summary_mostly"),
+    direction: direction,
+    home: place.phrase,
+    opposite: t("summary_opposite_" + named.join("_"))
+  });
 }
 
 // "2026-10-30" -> "30.10.2026"

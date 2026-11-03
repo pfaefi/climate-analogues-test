@@ -244,6 +244,7 @@ button.back-to-start {
 .numbers-note { color: var(--muted); font-size: 0.8rem; margin: 8px 0 0; }
 .results-score { font-size: 1.1rem; font-weight: 700; margin: 16px 0 0; }
 .results-record { color: var(--muted); margin: 4px 0 0; }
+.results-summary { margin: 10px 0 0; }
 
 .results-map {
   height: 58vh;

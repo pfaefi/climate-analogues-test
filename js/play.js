@@ -14,7 +14,7 @@ import { loadGoogleMaps } from "./google.js";
 import { loadPool, loadRegions, loadBundle, regionAt } from "./data.js";
 import { sendEvent } from "./events.js";
 import { shownImages, rememberGame } from "./memory.js";
-import { climateOfGuess } from "./climate.js";
+import { climateOfGuess, climateDirection } from "./climate.js";
 
 const MAX_POINTS = 5000;
 const SCALE_KM = 2000;
@@ -358,7 +358,7 @@ function totalPoints() {
 // The line below the climate points: "Ein normaler Sommer am Ort deines Tipps, verglichen mit
 // deinem Sommer 2026 in Zürich (ZH): 1.8 °C kühler, 35 % feuchter." The comparison is with the
 // place's own summer 2026 (the numbers of the results screen); differences below 0.5 °C or
-// 10 % count as "about the same".
+// 10 % count as "about the same" (climateDirection in climate.js).
 function climateText(result) {
   return climateSentence(result.climate, game.place, regionName(result.guessRegionId));
 }
@@ -370,15 +370,13 @@ export function climateSentence(climate, place, guessRegion = null) {
   if (climate.sea) return t("reveal_climate_sea");
   if (climate.meanT === undefined) return t("reveal_climate_area");   // orange area without 8 km data
 
-  const cell = place.cell;
-  const differenceT = climate.meanT - cell.t_2026;
-  const differenceP = (climate.meanP / cell.p_2026 - 1) * 100;
+  const direction = climateDirection(climate, place.cell);
   let warmth = t("climate_same_t");
-  if (differenceT >= 0.5) warmth = t("climate_warmer", { value: formatDecimal(differenceT) });
-  if (differenceT <= -0.5) warmth = t("climate_cooler", { value: formatDecimal(-differenceT) });
+  if (direction.t === "warmer") warmth = t("climate_warmer", { value: formatDecimal(direction.differenceT) });
+  if (direction.t === "cooler") warmth = t("climate_cooler", { value: formatDecimal(-direction.differenceT) });
   let wetness = t("climate_same_p");
-  if (differenceP >= 10) wetness = t("climate_wetter", { value: formatNumber(Math.round(differenceP)) });
-  if (differenceP <= -10) wetness = t("climate_drier", { value: formatNumber(Math.round(-differenceP)) });
+  if (direction.p === "wetter") wetness = t("climate_wetter", { value: formatNumber(Math.round(direction.differenceP)) });
+  if (direction.p === "drier") wetness = t("climate_drier", { value: formatNumber(Math.round(-direction.differenceP)) });
   const region = guessRegion === null || guessRegion === "?" ? "" : " (" + guessRegion + ")";
   let text = t("reveal_climate_compare", { warmth: warmth, wetness: wetness, home: place.phrase, region: region });
   if (climate.inArea) text += " " + t("reveal_climate_in_area");
