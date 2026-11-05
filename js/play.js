@@ -66,6 +66,7 @@ export async function startPlay(place, finished) {
   if (window.APP_SETTINGS.debug) {
     window.appDebug = {
       game: () => game,
+      streetView: () => streetView,
       guess: (lat, lon) => placeGuess(new google.maps.LatLng(lat, lon)),
       // A new draw of the rounds with the same rule, without playing them.
       draw: () => choosePanoramas(panoramas, bundle.regions, regions, window.APP_SETTINGS.rounds)
@@ -169,11 +170,13 @@ function weightedPick(items) {
 
 function makeMaps() {
   if (streetView !== null) return;
-  // Street View: look around only (no walking to the next village sign), no address,
-  // no road names (app_plan.md §7). No zoom buttons: zooming works with two fingers or the
-  // mouse wheel, and on phones the buttons lay under «Wo bist du?» (user's test 2026-10-30).
+  // Street View: no address, no road names (app_plan.md §7). Walking to the neighbouring
+  // panoramas only if settings.js allows it (walking, app_plan.md §22); otherwise look around
+  // only. No zoom buttons: zooming works with two fingers or the mouse wheel, and on phones
+  // the buttons lay under «Wo bist du?» (user's test 2026-10-30).
+  const walking = window.APP_SETTINGS.walking === true;
   streetView = new google.maps.StreetViewPanorama(document.getElementById("street-view"), {
-    addressControl: false, showRoadLabels: false, linksControl: false, clickToGo: false,
+    addressControl: false, showRoadLabels: false, linksControl: walking, clickToGo: walking,
     fullscreenControl: false, motionTracking: false, motionTrackingControl: false,
     enableCloseButton: false, panControl: false, zoomControl: false
   });
@@ -184,17 +187,28 @@ function makeMaps() {
   });
   guessMap.addListener("click", event => placeGuess(event.latLng));
   // Check that Street View really shows the drawn panorama; if Google shows another one
-  // (or keeps the previous one), set it again, at most twice per round.
+  // (or keeps the previous one), set it again, at most twice per round. Once the drawn
+  // panorama was shown, a change comes from the player: allowed if walking is on; without
+  // walking (e.g. arrow keys) the drawn panorama is set again.
   streetView.addListener("pano_changed", () => {
     if (game === null || game.state !== "guessing") return;
     const expected = game.rounds[game.roundIndex].pano_id;
     const shown = streetView.getPano();
-    if (shown !== expected && game.panoRetries < 2) {
+    if (shown === expected) {
+      game.panoShown = true;
+      return;
+    }
+    if (game.panoShown) {
+      if (!walking) streetView.setPano(expected);
+      return;
+    }
+    if (game.panoRetries < 2) {
       console.warn("Street View shows " + shown + " instead of " + expected + "; set again");
       game.panoRetries += 1;
       streetView.setPano(expected);
     }
   });
+  document.getElementById("walk-back").hidden = !walking;
   // A start view: a map created without centre and zoom in a hidden box sometimes loaded no
   // tiles when it was first shown, until the user zoomed (user's test 2026-11-02).
   revealMap = new google.maps.Map(document.getElementById("reveal-map"), {
@@ -217,12 +231,14 @@ function startRound() {
   document.getElementById("reveal-panel").hidden = true;
 
   game.panoRetries = 0;
+  game.panoShown = false;
   // The panorama keeps the size of its box from when it was last visible. If the window
   // changed size in between (e.g. the results map in full screen, app_test_notes 29.10 point 6),
   // Street View drew only a small image in a corner; "resize" makes it measure its box again.
   google.maps.event.trigger(streetView, "resize");
+  game.startPov = { heading: Math.random() * 360, pitch: 0 };
   streetView.setPano(pano.pano_id);
-  streetView.setPov({ heading: Math.random() * 360, pitch: 0 });
+  streetView.setPov(game.startPov);
   streetView.setZoom(0);
 
   guessMap.setCenter({ lat: 30, lng: 10 });
@@ -451,4 +467,13 @@ function setUpButtons() {
   document.getElementById("guess-backdrop").addEventListener("click", () => openGuessPanel(false));
   document.getElementById("guess-button").addEventListener("click", confirmGuess);
   document.getElementById("next-button").addEventListener("click", nextRound);
+  document.getElementById("walk-back").addEventListener("click", walkBack);
+}
+
+// «Zurück zum Start» (only with walking on): the drawn panorama and the first view again.
+function walkBack() {
+  if (game === null || game.state !== "guessing") return;
+  streetView.setPano(game.rounds[game.roundIndex].pano_id);
+  streetView.setPov(game.startPov);
+  streetView.setZoom(0);
 }

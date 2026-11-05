@@ -10,6 +10,12 @@ window.APP_SETTINGS = {
   // Number of rounds per game.
   rounds: 5,
 
+  // Walking in Street View (app_plan.md §22): true lets players move to the neighbouring
+  // panoramas (arrows, clicks on the road) and shows «Zurück zum Start»; false allows looking
+  // around only. Google bills per Street View object, not per panorama, so walking very
+  // probably costs nothing extra (maps_and_imagery.md §2).
+  walking: true,
+
   // Built-up share [%] of the 1 km cell from which the app notes that the grid data miss the
   // urban heat island (app_plan.md §13; script 34). null switches the note off.
   urbanNoteThreshold: 50,

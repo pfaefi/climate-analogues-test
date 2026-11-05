@@ -39,6 +39,7 @@
   "play_error": "Die Bilder konnten nicht geladen werden. Bitte versuche es später nochmals.",
   "guess_open": "Wo bist du? Auf der Karte raten",
   "guess_close": "Zurück zum Bild",
+  "walk_back": "Zurück zum Start",
   "guess_choose": "Tippe auf die Karte",
   "guess_confirm": "Raten",
   "reveal_distance": "Ort: {km} km daneben, {points}",
