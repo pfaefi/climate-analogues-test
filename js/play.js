@@ -49,7 +49,7 @@ export async function startPlay(place, finished) {
     place: place,
     regions: regions,
     bundle: bundle,
-    rounds: choosePanoramas(panoramas, bundle.regions, window.APP_SETTINGS.rounds, shownImages()),
+    rounds: choosePanoramas(panoramas, bundle.regions, regions, window.APP_SETTINGS.rounds, shownImages()),
     roundIndex: 0,
     state: "guessing",      // "guessing" -> "revealed" -> next round; blocks double clicks
     results: []
@@ -68,7 +68,7 @@ export async function startPlay(place, finished) {
       game: () => game,
       guess: (lat, lon) => placeGuess(new google.maps.LatLng(lat, lon)),
       // A new draw of the rounds with the same rule, without playing them.
-      draw: () => choosePanoramas(panoramas, bundle.regions, window.APP_SETTINGS.rounds)
+      draw: () => choosePanoramas(panoramas, bundle.regions, regions, window.APP_SETTINGS.rounds)
     };
   }
 }
@@ -82,13 +82,26 @@ export async function startPlay(place, finished) {
 // panoramas) (only regions with at least one panorama), then a random panorama in it.
 // Weighting by area alone (method_decision.md §9a) made the single image of a large region
 // come again and again; weighting by images alone favours the countries with many images
-// (script 35, data_and_tests.md §27). This mixed weight halves the repeats. Each region at most once per game, so that the rounds show
-// different regions. Regions not in the bundle file (less than 25 km² of analogue area,
+// (script 35, data_and_tests.md §27). This mixed weight halves the repeats. Each region at
+// most once per game. Regions not in the bundle file (less than 25 km² of analogue area,
 // data_and_tests.md §20) get the weight of 25 km².
+// Images from different continents and far apart (user, 2026-11-05; app_plan.md §21): after
+// each round, the weight of a region is multiplied by CONTINENT_FACTOR if its continent was
+// already shown and by NEAR_FACTOR if it lies within SPREAD_KM of an image already shown;
+// inside the chosen region, a panorama at least SPREAD_KM from those shown is taken where
+// there is one. These are penalties, not fixed rules, so a bundle with images on one
+// continent only still gets five rounds (script 45, data_and_tests.md §36: 3.9 instead of
+// 2.6 continents per game; two images closer than 1000 km in 18 % instead of 91 % of the
+// games). A region's position is the centre of its analogue cells (bundle file), else the
+// median position of its panoramas.
 // Images shown in earlier games in this browser (avoid) are left out, so that the same image
 // does not come again soon (app_plan.md §14); when fewer regions than rounds are left, the
 // memory is ignored for this game.
-function choosePanoramas(panoramas, regions, count, avoid = new Set()) {
+const CONTINENT_FACTOR = 0.2;
+const NEAR_FACTOR = 0.1;
+const SPREAD_KM = 1000;
+
+function choosePanoramas(panoramas, bundleRegions, regionTable, count, avoid = new Set()) {
   const fresh = panoramas.filter(pano => !avoid.has(pano.pano_id));
   if (new Set(fresh.map(pano => pano.region_id)).size >= count) panoramas = fresh;
   const byRegion = new Map();
@@ -96,18 +109,47 @@ function choosePanoramas(panoramas, regions, count, avoid = new Set()) {
     if (!byRegion.has(pano.region_id)) byRegion.set(pano.region_id, []);
     byRegion.get(pano.region_id).push(pano);
   }
-  const areaOf = new Map(regions.map(r => [r.region_id, r.area_km2]));
-  let candidates = [...byRegion.keys()].map(id => ({
-    id: id, weight: Math.sqrt(areaOf.get(id) || 25) * Math.sqrt(byRegion.get(id).length) }));
+  const fromBundle = new Map(bundleRegions.map(r => [r.region_id, r]));
+  let candidates = [...byRegion.keys()].map(id => {
+    const inBundle = fromBundle.get(id);
+    const panos = byRegion.get(id);
+    const region = regionTable.get(id);
+    return {
+      id: id,
+      weight: Math.sqrt(inBundle ? inBundle.area_km2 : 25) * Math.sqrt(panos.length),
+      continent: region ? region.continent : "unknown",
+      lat: inBundle ? inBundle.lat : median(panos.map(p => p.lat)),
+      lon: inBundle ? inBundle.lon : median(panos.map(p => p.lon))
+    };
+  });
 
   const chosen = [];
+  const shownContinents = new Set();
   while (chosen.length < count && candidates.length > 0) {
-    const region = weightedPick(candidates);
-    const options = byRegion.get(region.id);
+    // Penalties for continents already shown and for regions near an image already shown.
+    const weighted = candidates.map(c => {
+      let weight = c.weight;
+      if (shownContinents.has(c.continent)) weight *= CONTINENT_FACTOR;
+      if (chosen.some(p => distanceKm(p.lat, p.lon, c.lat, c.lon) < SPREAD_KM)) weight *= NEAR_FACTOR;
+      return { ...c, weight: weight };
+    });
+    const region = weightedPick(weighted);
+
+    // A panorama of the region, far from the images shown where possible.
+    let options = byRegion.get(region.id);
+    const far = options.filter(o => chosen.every(p => distanceKm(p.lat, p.lon, o.lat, o.lon) >= SPREAD_KM));
+    if (far.length > 0) options = far;
     chosen.push(options[Math.floor(Math.random() * options.length)]);
+    shownContinents.add(region.continent);
     candidates = candidates.filter(c => c.id !== region.id);
   }
   return chosen;
+}
+
+function median(values) {
+  const sorted = [...values].sort((a, b) => a - b);
+  const middle = Math.floor(sorted.length / 2);
+  return sorted.length % 2 === 1 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2;
 }
 
 function weightedPick(items) {

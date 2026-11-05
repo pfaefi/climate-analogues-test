@@ -146,9 +146,9 @@ async function regionOfCell(index, row, column) {
   return region === 0 ? null : region;
 }
 
-// Names of all regions in the language of the app (script 31, about 145 kB), as a Map
-// region_id -> { name, country }.
+// Names of all regions in the language of the app and their continent (script 31, about
+// 190 kB), as a Map region_id -> { name, country, continent }.
 export async function loadRegions() {
   const content = await fetchProduct("regions_" + window.APP_SETTINGS.language + ".json");
-  return new Map(content.rows.map(row => [row[0], { name: row[1], country: row[2] }]));
+  return new Map(content.rows.map(row => [row[0], { name: row[1], country: row[2], continent: row[3] }]));
 }
