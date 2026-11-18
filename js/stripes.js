@@ -87,3 +87,15 @@ function text(xPosition, yPosition, content, className) {
   node.textContent = content;
   return node;
 }
+
+// Draw every stripes graphic of a text page that names its data file in the attribute
+// data-stripes, with the labels of the colour bar in data-low and data-high (info.html).
+// Called by the page's own script when the page is opened on its own and by js/pages.js when
+// the app shows the page inside index.html (scripts of a loaded page do not run there).
+export async function drawPageStripes(root) {
+  for (const chart of root.querySelectorAll("[data-stripes]")) {
+    const response = await fetch(chart.dataset.stripes);
+    const series = await response.json();
+    drawStripes(chart, series, { low: chart.dataset.low, high: chart.dataset.high });
+  }
+}

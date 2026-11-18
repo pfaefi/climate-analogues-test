@@ -8,11 +8,174 @@
   <link rel="stylesheet" href="css/app.css">
 </head>
 <body>
-  <!-- Placeholder page (app_plan.md §10); content follows in a later step. -->
-  <section class="screen">
+  <!--
+    Information page on the extreme summer 2026 (app_plan.md §8 point 5, §23). Draft by Claude on
+    2026-11-17 from Ino's proposal («Inos Hitzesommer.docx», with the user's markers in capitals)
+    and the facts of the MeteoSwiss summer bulletin 2026 and two MeteoSwiss blog posts; edited by the
+    user and reordered on 2026-11-17. Images and the Swiss stripes data in info/ come from
+    scripts/46_info_page_products.R. External links open in a new tab, as on the methods page.
+    The stripes graphic is drawn by drawPageStripes() in js/stripes.js: by the script at the end
+    when the page is opened on its own, by js/pages.js when the app shows the page inside
+    index.html (the usual way). It needs http (local server of scripts/serve_app.R or the test
+    site), not the file opened directly.
+  -->
+  <section class="screen text-page">
     <p><a href="index.html">← Zurück</a></p>
     <h1>Informationen zum Extremsommer 2026</h1>
-    <p>Diese Seite ist noch im Bau.</p>
+
+    <p>Detaillierte Infos zu den Messungen und Analysen des Sommers 2026 in der Schweiz findest du bei
+    <a href="https://www.meteoschweiz.admin.ch" target="_blank" rel="noopener">MeteoSchweiz</a>, insbesondere im
+    <a href="https://www.meteoschweiz.admin.ch/dam/jcr:dccbcb08-8ce3-497c-9d30-da955f1ab5dd/2026_JJA-d.pdf" target="_blank" rel="noopener">Klimabulletin
+    zum Sommer (Juni–August) 2026</a>. Hier sind nur einige der wichtigsten Merkmale des Extremsommers aus diesen
+    Dokumenten zusammengefasst.</p>
+
+    <ul>
+      <li>2026 war der heisseste Sommer seit Messbeginn im Jahr 1864 in der Schweiz.</li>
+      <li>2026 war ein extrem trockener Sommer.
+        <a href="https://www.meteoschweiz.admin.ch/ueber-uns/meteoschweiz-blog/de/2026/09/drei-grad-waermer-und-drei-monatsniederschlaege-weniger.html" target="_blank" rel="noopener">Über
+        das ganze Sommerhalbjahr (April–September) gab es am wenigsten Niederschlag seit Messbeginn 1864</a>.</li>
+      <li>2026 gab es an vielen Orten in der Schweiz mehr Hitzetage und Tropennächte als jemals zuvor gemessen wurden.</li>
+    </ul>
+
+    <p>Gemäss <a href="https://www.meteoschweiz.admin.ch/klima/klimawandel/steigende-temperaturen.html" target="_blank" rel="noopener">MeteoSchweiz</a>
+    steuern wir mit den weltweit derzeit geplanten Klimaschutzmassnahmen bis Ende Jahrhundert auf eine «3-Grad-Welt» zu,
+    eine Welt, die sich im Vergleich zur vorindustriellen Zeit um 3 °C erwärmt hat. In einer solchen Zukunft wird der
+    Sommer 2026 in Bezug auf die Temperatur ein durchschnittlicher Sommer sein. In Bezug auf den Niederschlag war der
+    Sommer 2026 sogar noch trockener als ein durchschnittlicher Sommer in der Schweiz einer 3-Grad-Welt.</p>
+
+    <h2>Wo war es besonders heiss und trocken?</h2>
+    <p>In den folgenden Abbildungen siehst du, in welchen Regionen der Schweiz der Sommer 2026 besonders heiss und
+    trocken war.</p>
+
+    <div class="map-grid">
+      <figure class="info-figure">
+        <img src="info/map_temperature.png" alt="Karte der Schweiz: Temperatur im Sommer 2026 über dem Mittel 1991–2020">
+        <figcaption>Temperatur im Sommer 2026: Die Farben zeigen, wie viel wärmer es an jedem Ort war als im
+        Mittel 1991–2020 (°C).</figcaption>
+      </figure>
+      <figure class="info-figure">
+        <img src="info/map_precipitation.png" alt="Karte der Schweiz: Niederschlag im Sommer 2026 in Prozent des Mittels 1991–2020">
+        <figcaption>Niederschlag im Sommer 2026: Die Farben zeigen, wie viel Niederschlag an jedem Ort fiel, in
+        Prozent des Mittels 1991–2020. Weiss: etwa so viel wie üblich; braun: trockener; blau: nasser.</figcaption>
+      </figure>
+      <figure class="info-figure">
+        <img src="info/map_heat_days.png" alt="Karte der Schweiz: zusätzliche Hitzetage im Sommer 2026">
+        <figcaption>Hitzetage (Tageshöchsttemperatur mindestens 30 °C): Die Farben zeigen, wie viele Hitzetage
+        mehr es 2026 an jedem Ort gab als im Mittel 1991–2020.</figcaption>
+      </figure>
+      <figure class="info-figure">
+        <img src="info/map_tropical_nights.png" alt="Karte der Schweiz: zusätzliche Tropennächte im Sommer 2026">
+        <figcaption>Tropennächte (Temperatur sinkt nicht unter 20 °C): Die Farben zeigen, wie viele Tropennächte
+        mehr es 2026 an jedem Ort gab als im Mittel 1991–2020.</figcaption>
+      </figure>
+    </div>
+    <p class="small-list">Juni bis August, 1-km-Gitterdaten von MeteoSchweiz; eigene Auswertung mit denselben Daten wie im
+    Spiel (siehe <a href="methods.html">Methoden</a>).</p>
+
+    <h2>Regionale Unterschiede</h2>
+    <p>Gemäss dem Klimabulletin lagen die Temperaturen in der West- und Nordwestschweiz sowie stellenweise auf der
+    Alpensüdseite um 4 °C oder mehr über dem Mittel 1991–2020. Weniger gross war der Unterschied in den hohen Lagen
+    der Alpen und im Südosten des Landes. Besonders wenig Regen fiel im Mittelland und am Alpennordhang: verbreitet
+    nur 45 bis 70 % der sonst üblichen Sommermenge. Im Wallis, im Engadin und auf der Alpensüdseite war der Sommer
+    dagegen kaum trockener als üblich (etwa 80 bis 105 %). Im Flachland und in den Tälern zählten die Messstationen rund
+    35 bis 55 Hitzetage. Am meisten Tropennächte gab es mit 50 in Locarno-Monti. Auch an Seen und in Städten blieb
+    es nachts oft über 20 °C. Wie stark eine Stadt nachts warm bleibt, zeigt Zürich: In der Stadt (Station Kaserne)
+    gab es 38 Tropennächte, am ländlichen Stadtrand (Station Affoltern) keine einzige.</p>
+    <p>Weil der Süden grösstenteils heiss, aber nicht trocken war, findet das Spiel für Orte im Tessin oder im Engadin andere
+    Analoggebiete als für Orte im Mittelland.</p>
+
+    <h2>Heiss und trocken zugleich</h2>
+    <p>Der Sommer 2026 war also heiss und trocken zugleich. Im Spiel zeigen wir für deinen ausgewählten Ort einen kombinierten Hitze- und
+    Trockenheitsindikator, der einen Vergleich von 2026 mit früheren Jahren bezüglich Hitze <i>und</i> Trockenheit
+    erlaubt (Details dazu auf der <a href="methods.html">Methodenseite</a>).</p>
+
+    <p>Die folgende Abbildung zeigt den Indikator für die ganze Schweiz über die Jahre 1961–2026. Kein anderer
+    Sommer seit 1961 erreichte einen so hohen Wert wie 2026.</p>
+
+    <!-- The stripes are drawn by drawPageStripes() (js/stripes.js) from the file in data-stripes;
+         classes instead of ids, because the app's results screen already has the ids stripes-… -->
+    <div class="info-stripes">
+      <h3>Heisse und trockene Sommer in der Schweiz, 1961–2026</h3>
+      <p class="stripes-subtitle">Gemeinsamer Hitze-Trockenheitsindikator, relativ zu 1991–2020</p>
+      <div class="stripes-chart" data-stripes="info/stripes_ch.json" data-low="kühl und nass"
+           data-high="heiss und trocken"></div>
+      <p class="stripes-caption">Jeder Balken ist ein Sommer (Juni bis August). Der Indikator kombiniert die
+      Mitteltemperatur und den Niederschlag der ganzen Schweiz, beide relativ zu den Sommern 1991–2020. Ein heisser,
+      aber nasser Sommer kann deshalb neutral erscheinen. Daten: MeteoSchweiz; eigene Auswertung.</p>
+    </div>
+
+    <p>Auch lokal war 2026 vielerorts aussergewöhnlich: An knapp 90 % der Orte in der Schweiz war es der
+    heisseste Sommer seit 1961, an rund 16 % zugleich der trockenste. Im kombinierten Hitze-Trockenheitsindikator
+    erreichte 2026 an gut zwei Dritteln der Orte den höchsten Wert seit 1961, an über 90 % einen der drei höchsten
+    Werte.</p>
+
+    <figure class="info-figure">
+      <img src="info/map_index_rank.png" alt="Karte der Schweiz: Rang des Sommers 2026 im Hitze-Trockenheitsindikator seit 1961">
+      <figcaption>Rang des Sommers 2026 unter allen Sommern seit 1961 im kombinierten Hitze-Trockenheitsindikator.
+      Rang 1: höchster Wert des Indikators seit 1961.</figcaption>
+      <!-- Rust to gold: not used elsewhere in the app (grey too colourless, blue-violet suggested cold). -->
+    </figure>
+
+    <h2>Was das Spiel zeigt</h2>
+    <p>Motiviert von diesen Fakten zeigen wir dir in diesem Hitzesommer-Guesser-Spiel, wo ein Sommer, wie wir ihn 2026
+    in der Schweiz erlebt haben, bereits heute zum Alltag gehört. Am Schluss des Spiels siehst du ausserdem, wie
+    aussergewöhnlich der Sommer 2026 an deinem Ort im Vergleich zu den Sommern 1991–2020 war, bezüglich Temperatur,
+    Niederschlag, Hitzetagen und Tropennächten.</p>
+
+    <p>Als «Alltag» gilt im Spiel ein Sommer, wie er in den Jahren 1991–2020 typisch war. Das ist eine übliche Referenzperiode der Klimastatistik.
+    Seither ist es allerdings weiter wärmer geworden: Gegenüber dem Mittel 1991–2020 war der Sommer 2026 in der
+    Schweiz 3,4 °C wärmer. Im heutigen Klima ist ein so heisser Sommer wie 2026 gesamtschweizerisch ungefähr alle
+    20 bis 50 Jahre zu erwarten (<a href="https://www.meteoschweiz.admin.ch/ueber-uns/meteoschweiz-blog/de/2026/11/wie-aussergewoehnlich-war-der-sommer-2026-wirklich.html" target="_blank" rel="noopener">MeteoSchweiz-Blog</a>;
+    diese Angabe betrifft nur die Temperatur).</p>
+
+    <figure class="info-figure">
+      <img src="info/map_world.png" alt="Weltkarte: Gebiete, in denen ein Sommer wie 2026 in der Schweiz zum Alltag gehört">
+      <figcaption>Wo ein Sommer wie 2026 in der Schweiz zum Alltag gehört. Für jedes Gebiet von rund 8 × 8 km
+      zeigt die Farbe, für wie viele Schweizer Orte (1-km-Felder) ihr Sommer 2026 dort einem gewöhnlichen Sommer der
+      Jahre 1991–2020 entspricht. Dunkle Gebiete passen zu vielen Schweizer Orten zugleich, zum Beispiel grosse Gebiete im mittleren Westen der USA, in Südosteuropa, im Nordosten Chinas und am Río de
+      la Plata in Südamerika. Auch Gebiete in der Schweiz sind markiert, weil zum Beispiel der Sommer 2026 einer
+      Berggemeinde in einer tiefer gelegenen Region der Schweiz heute alltäglich sein kann. Die Tropen wurden für
+      diese Suche nicht berücksichtigt. Daten: MeteoSchweiz, CHELSA; eigene Auswertung.</figcaption>
+    </figure>
+
+    <h2>Folgen des Hitzesommers</h2>
+    <p>Der Sommer hatte unter anderem diese Folgen (gemäss Klimabulletin, mit Auswertungen des BAFU; zur
+    Landwirtschaft gemäss BFS, zur Gesundheit gemäss Swiss TPH):</p>
+    <ul>
+      <li>An knapp 40 % der Abflussmessstationen floss von Juni bis August so wenig Wasser wie noch nie in diesen
+      Monaten, vor allem im zentralen und östlichen Mittelland, in den Voralpen und in Graubünden. Zürichsee,
+      Walensee und Bodensee lagen tiefer als je zuvor zu dieser Jahreszeit.</li>
+      <li>An fast 60 % der Stationen war das Wasser so warm wie noch nie seit Messbeginn; die Aare in Bern erreichte
+      am 14. Juli 24,8 °C. Für Fische, die kühles, sauerstoffreiches Wasser brauchen, etwa Äsche und Bachforelle,
+      bedeutet das grossen Stress.</li>
+      <li>Der Rhein bei Basel führte von April bis Mitte August etwa so wenig Wasser wie in einem Extremszenario, das
+      für die Jahre 2025–2040 modelliert wurde.</li>
+      <li>Wald und Landwirtschaft erlitten Schäden, die auch späterer Regen nicht mehr gutmacht.</li>
+      <li>Die Landwirtschaft erwirtschaftete deutlich weniger. Gemäss einer ersten Schätzung des Bundesamts für
+      Statistik fielen die Ernten von Zuckerrüben und Kartoffeln so tief aus wie seit dreissig Jahren nicht mehr,
+      und wegen der schwachen Erträge und der früh aufgebrauchten Futterreserven sank der Wert der
+      Futtermittelproduktion um rund ein Fünftel
+      (<a href="https://statistik.admin.ch/de/news/2026-0435" target="_blank" rel="noopener">BFS, 17.11.2026</a>).</li>
+      <li>Die Hitze belastete auch die Gesundheit stark. Nach einer ersten Schätzung des Schweizerischen Tropen- und
+      Public-Health-Instituts (Swiss TPH) im Auftrag des BAG lassen sich von Mai bis August 2026 rund 1260
+      Todesfälle statistisch der Hitze zuschreiben (Unsicherheitsbereich etwa 1050 bis 1480). Das sind etwa 5,5 %
+      aller Todesfälle in dieser Zeit und ähnlich viele wie im Hitzesommer 2003. Rund 85 % dieser Todesfälle
+      betrafen Menschen ab 75 Jahren. Die Zahlen sind provisorisch; der ausführliche Bericht folgt im Frühjahr 2027
+      (<a href="https://www.bag.admin.ch/de/hitzebedingte-sterblichkeit" target="_blank" rel="noopener">BAG:
+      Hitzebedingte Sterblichkeit</a>).</li>
+      <li>Weitere Folgen: Wegen der hohen Waldbrandgefahr galt ab Ende Juli ein landesweites Feuerverbot. In der
+      Viehwirtschaft fehlte Futter, und es wurden mehr Kühe geschlachtet als in anderen Jahren; manche Alpen
+      mussten per Helikopter mit Wasser versorgt werden. Örtlich wurde die Wassernutzung eingeschränkt, und der
+      niedrige Pegel behinderte die Rheinschifffahrt stark.</li>
+    </ul>
   </section>
+
+  <script type="module">
+    // The compound stripes of Switzerland as a whole (scripts/46_info_page_products.R), drawn
+    // with the same function as on the result screen. This script runs only when the page is
+    // opened on its own; inside the app, js/pages.js draws the stripes.
+    import { drawPageStripes } from "./js/stripes.js";
+    drawPageStripes(document);
+  </script>
 </body>
 </html>

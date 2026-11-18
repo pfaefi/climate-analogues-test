@@ -5,6 +5,8 @@
 // «Zurück» (or the browser's back button) returns to the screen that was open before, with
 // the results, the map and the scroll position unchanged.
 
+import { drawPageStripes } from "./stripes.js";
+
 const PAGES = ["info.html", "methods.html", "about.html"];
 
 let showScreen = null;        // from main.js
@@ -40,7 +42,10 @@ async function openPage(file, screen) {
   const page = new DOMParser().parseFromString(html, "text/html");
   const section = page.querySelector("section");
   section.querySelector("p").remove();
-  document.getElementById("page-content").replaceChildren(...section.childNodes);
+  const content = document.getElementById("page-content");
+  content.replaceChildren(...section.childNodes);
+  // Scripts of the loaded page do not run here, so its stripes graphic is drawn from here.
+  drawPageStripes(content);
 
   // A page opened from another page (about → methods) keeps the first way back.
   if (previous === null) {

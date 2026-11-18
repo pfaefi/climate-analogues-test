@@ -212,6 +212,15 @@ button.back-to-start {
 .text-page h2 { margin-top: 26px; }
 .text-page li { margin-bottom: 8px; }
 .text-page .small-list { font-size: 0.85rem; color: var(--muted); }
+
+/* Figures of the information page (maps as images; two Swiss maps side by side on wide screens) */
+.info-figure { margin: 16px 0; }
+.info-figure img { width: 100%; height: auto; display: block; }
+.info-figure figcaption { color: var(--muted); font-size: 0.85rem; margin-top: 6px; }
+.map-grid { display: grid; grid-template-columns: 1fr; gap: 0 20px; }
+@media (min-width: 700px) {
+  .map-grid { grid-template-columns: 1fr 1fr; }
+}
 .draft-note {
   display: inline-block;
   padding: 4px 10px;
