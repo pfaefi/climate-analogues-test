@@ -13,7 +13,7 @@ import { t, withElevation } from "./i18n.js";
 import { loadGoogleMaps } from "./google.js";
 import { fetchProduct, loadRegions } from "./data.js";
 import { imagePixels, MIDDLE_MAP, makeEnlargeButton, enlargeMap } from "./results.js";
-import { climateSentence } from "./play.js";
+import { climateSentence, panoramaExists } from "./play.js";
 
 const PRODUCTS = window.APP_SETTINGS.products;
 
@@ -325,6 +325,10 @@ function fillRounds(place, game, regions) {
   list.replaceChildren();
   box.hidden = game === null;
   if (game === null) return;
+  // «Deine fünf Runden»; a game can have fewer rounds (few regions with images, or a missing
+  // image without a replacement, play.js).
+  const rounds = game.results.length;
+  box.querySelector("h2").textContent = rounds === 5 ? t("detail_rounds_title") : t("detail_rounds_title_other", { rounds: rounds });
 
   game.results.forEach((result, k) => {
     const item = document.createElement("li");
@@ -370,6 +374,17 @@ async function togglePanorama(result, box, button) {
   box.hidden = false;
   button.textContent = t("detail_hide_panorama");
   await loadGoogleMaps();
+  // The image was checked when the game started, but Google may have removed it since (it
+  // publishes new captures again under new ids, play.js): then a sentence, not a black box.
+  const exists = await panoramaExists(new google.maps.StreetViewService(), result.pano.pano_id);
+  if (!exists) {
+    const message = document.createElement("p");
+    message.className = "round-panorama-missing";
+    message.textContent = t("detail_panorama_missing");
+    box.replaceChildren(message);
+    panorama = { box: box, button: button, view: null };
+    return;
+  }
   panorama = {
     box: box, button: button,
     view: new google.maps.StreetViewPanorama(box, {
@@ -381,7 +396,7 @@ async function togglePanorama(result, box, button) {
 
 function closePanorama() {
   if (panorama === null) return;
-  panorama.view.setVisible(false);
+  if (panorama.view !== null) panorama.view.setVisible(false);
   panorama.box.replaceChildren();
   panorama.box.hidden = true;
   panorama.button.textContent = t("detail_show_panorama");

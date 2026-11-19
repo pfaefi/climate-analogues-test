@@ -37,6 +37,7 @@
   "play_exit": "Abbrechen",
   "play_loading": "Bilder werden geladen …",
   "play_error": "Die Bilder konnten nicht geladen werden. Bitte versuche es später nochmals.",
+  "play_no_images": "Zu diesem Ort sind zurzeit keine Strassenbilder verfügbar.",
   "guess_open": "Wo bist du? Auf der Karte raten",
   "guess_close": "Zurück zum Bild",
   "walk_back": "Zurück zum Start",
@@ -137,9 +138,11 @@
   "detail_note_tropics": "Hier sind auch die Tropen (etwa 25° Süd bis 25° Nord) eingefärbt, obwohl die Jahreszeiten dort nicht mit unseren vergleichbar sind. Als Sommer gelten dort Juni bis August nördlich und Dezember bis Februar südlich des Äquators. Die Analoggebiete in den Tropen sind nur grob bestimmt und nicht Teil der eigentlichen Suche.",
   "detail_note_data": "Raster von etwa 16 km. Daten: CHELSA, in der Schweiz MeteoSchweiz (siehe Methoden).",
   "detail_rounds_title": "Deine fünf Runden",
+  "detail_rounds_title_other": "Deine Runden ({rounds})",
   "detail_round_title": "Runde {round}: {region}",
   "detail_round_points": "Tipp {km} km daneben · {points} Punkte für den Ort · {climate} Punkte fürs Klima · Bild aufgenommen im {date}",
   "detail_show_on_map": "Auf der Karte zeigen",
   "detail_show_panorama": "Bild nochmals ansehen",
-  "detail_hide_panorama": "Bild schliessen"
+  "detail_hide_panorama": "Bild schliessen",
+  "detail_panorama_missing": "Dieses Bild ist bei Google nicht mehr verfügbar."
 }

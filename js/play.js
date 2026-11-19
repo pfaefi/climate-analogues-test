@@ -45,11 +45,20 @@ export async function startPlay(place, finished) {
   }
 
   const panoramas = place.panoramas.map(position => pool(position));
+  const avoid = shownImages();
+  let rounds = choosePanoramas(panoramas, bundle.regions, regions, window.APP_SETTINGS.rounds, avoid);
+  // Panoramas that Google no longer has are replaced before the game starts (see
+  // replaceMissingPanoramas); a round without any replacement is left out.
+  rounds = await replaceMissingPanoramas(rounds, panoramas, bundle.regions, regions, avoid);
+  if (rounds.length === 0) {
+    document.getElementById("play-loading").textContent = t("play_no_images");
+    return;
+  }
   game = {
     place: place,
     regions: regions,
     bundle: bundle,
-    rounds: choosePanoramas(panoramas, bundle.regions, regions, window.APP_SETTINGS.rounds, shownImages()),
+    rounds: rounds,
     roundIndex: 0,
     state: "guessing",      // "guessing" -> "revealed" -> next round; blocks double clicks
     results: []
@@ -102,7 +111,12 @@ const CONTINENT_FACTOR = 0.2;
 const NEAR_FACTOR = 0.1;
 const SPREAD_KM = 1000;
 
-function choosePanoramas(panoramas, bundleRegions, regionTable, count, avoid = new Set()) {
+// earlier: rounds already chosen (only when one round is drawn again to replace a missing
+// panorama): their regions are left out and they count for the penalties; only the new
+// rounds are returned.
+function choosePanoramas(panoramas, bundleRegions, regionTable, count, avoid = new Set(), earlier = []) {
+  const earlierRegions = new Set(earlier.map(pano => pano.region_id));
+  panoramas = panoramas.filter(pano => !earlierRegions.has(pano.region_id));
   const fresh = panoramas.filter(pano => !avoid.has(pano.pano_id));
   if (new Set(fresh.map(pano => pano.region_id)).size >= count) panoramas = fresh;
   const byRegion = new Map();
@@ -124,9 +138,14 @@ function choosePanoramas(panoramas, bundleRegions, regionTable, count, avoid = n
     };
   });
 
-  const chosen = [];
+  // chosen holds the earlier rounds first; only the rounds drawn here are returned.
+  const chosen = [...earlier];
   const shownContinents = new Set();
-  while (chosen.length < count && candidates.length > 0) {
+  for (const pano of earlier) {
+    const region = regionTable.get(pano.region_id);
+    shownContinents.add(region ? region.continent : "unknown");
+  }
+  while (chosen.length < earlier.length + count && candidates.length > 0) {
     // Penalties for continents already shown and for regions near an image already shown.
     const weighted = candidates.map(c => {
       let weight = c.weight;
@@ -144,7 +163,66 @@ function choosePanoramas(panoramas, bundleRegions, regionTable, count, avoid = n
     shownContinents.add(region.continent);
     candidates = candidates.filter(c => c.id !== region.id);
   }
-  return chosen;
+  return chosen.slice(earlier.length);
+}
+
+// Missing panoramas (user's test 2026-11-18, data_and_tests.md §38): Google sometimes publishes
+// new captures again under new ids, so a few panorama ids of the pool no longer exist (above
+// all images of 2026). Street View then shows a black image with the arrows of the previous
+// round. Before the game starts, each drawn panorama is checked with Google's free metadata
+// request (StreetViewService). A missing one is replaced by another panorama of the same
+// region (one not yet in this game, preferably one not shown in earlier games); if the region
+// has none left, by a panorama of another region, drawn with the same rule as the others. At
+// most MAX_REPLACEMENTS tries per round; a round without a replacement is left out (the game
+// then has fewer rounds, as for places with images from only a few regions). A failed check
+// (no network, other errors) keeps the panorama: only "ZERO_RESULTS" counts as missing.
+const MAX_REPLACEMENTS = 5;
+
+async function replaceMissingPanoramas(rounds, panoramas, bundleRegions, regionTable, avoid) {
+  const service = new google.maps.StreetViewService();
+  const missing = new Set();
+  const exists = await Promise.all(rounds.map(pano => panoramaExists(service, pano.pano_id)));
+  const result = [...rounds];
+  for (let k = 0; k < result.length; k += 1) {
+    if (exists[k]) continue;
+    const lost = result[k];
+    missing.add(lost.pano_id);
+    console.warn("Panorama " + lost.pano_id + " no longer exists at Google; drawing another one");
+    // Try up to MAX_REPLACEMENTS candidates; the first one that exists replaces the round.
+    let replacement = null;
+    for (let tries = 0; tries < MAX_REPLACEMENTS; tries += 1) {
+      const candidate = replacementPanorama(lost, result, panoramas, bundleRegions, regionTable, avoid, missing);
+      if (candidate === null) break;                 // nothing left to draw
+      if (await panoramaExists(service, candidate.pano_id)) {
+        replacement = candidate;
+        break;
+      }
+      missing.add(candidate.pano_id);
+    }
+    result[k] = replacement;                         // null: the round is left out
+  }
+  return result.filter(pano => pano !== null);
+}
+
+// Another panorama for a missing one: first from the same region, else from another region.
+function replacementPanorama(lost, rounds, panoramas, bundleRegions, regionTable, avoid, missing) {
+  const inGame = new Set(rounds.filter(p => p !== null).map(p => p.pano_id));
+  const usable = panoramas.filter(p => !missing.has(p.pano_id) && !inGame.has(p.pano_id));
+  let sameRegion = usable.filter(p => p.region_id === lost.region_id);
+  const fresh = sameRegion.filter(p => !avoid.has(p.pano_id));
+  if (fresh.length > 0) sameRegion = fresh;
+  if (sameRegion.length > 0) return sameRegion[Math.floor(Math.random() * sameRegion.length)];
+  // Another region: drawn like the other rounds, with their regions left out.
+  const others = rounds.filter(p => p !== null && p !== lost);
+  const drawn = choosePanoramas(usable, bundleRegions, regionTable, 1, avoid, others);
+  return drawn.length > 0 ? drawn[0] : null;
+}
+
+// Does Google still have this panorama? Only a clear "ZERO_RESULTS" counts as no.
+export function panoramaExists(service, panoId) {
+  return new Promise(resolve => {
+    service.getPanorama({ pano: panoId }, (data, status) => resolve(status !== "ZERO_RESULTS"));
+  });
 }
 
 function median(values) {

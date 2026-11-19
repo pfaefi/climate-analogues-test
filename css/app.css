@@ -553,3 +553,5 @@ button.play-exit {             /* "button." so that it wins over button.back-to-
   .reveal-map { min-height: 0; }
   .reveal-text { width: 380px; padding: 24px; }
 }
+.round-panorama-missing { color: var(--muted); padding: 12px 0; margin: 0; }
+.round-panorama:has(.round-panorama-missing) { height: auto; }
