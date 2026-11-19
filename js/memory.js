@@ -86,3 +86,37 @@ export function offerLogDownload() {
   link.textContent = "Testprotokoll herunterladen (" + log.length + " Spiele)";
   document.querySelector("#screen-start .page-footer").prepend(link);
 }
+
+// Question box (app_plan.md §24b): the number of games finished on this device, and whether
+// the first question was answered here (then the box is not shown again). Both stay on the
+// device; the count is sent with the answers, never an id.
+const GAMES_KEY = "hitzesommer_games_played";
+const SURVEY_KEY = "hitzesommer_survey_answered";
+
+// Count one more finished game and return the new number (1 if storage is blocked).
+export function countGame() {
+  let games = 0;
+  try {
+    games = Number(window.localStorage.getItem(GAMES_KEY)) || 0;
+    window.localStorage.setItem(GAMES_KEY, String(games + 1));
+  } catch (error) {
+    // Storage blocked: every game counts as the first.
+  }
+  return games + 1;
+}
+
+export function surveyAnswered() {
+  try {
+    return window.localStorage.getItem(SURVEY_KEY) !== null;
+  } catch (error) {
+    return false;
+  }
+}
+
+export function rememberSurveyAnswered() {
+  try {
+    window.localStorage.setItem(SURVEY_KEY, new Date().toISOString().slice(0, 10));
+  } catch (error) {
+    // Storage blocked: the box may appear again after the next game.
+  }
+}

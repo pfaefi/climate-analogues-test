@@ -1,4 +1,10 @@
 // Settings of the app (documentation/app_plan.md §10). Change values here, not in the code.
+
+// True when the app runs on this PC (scripts/serve_app.R on http://localhost:8000), false on
+// the public test site. Used below to store the events (and the answers of the question box)
+// only in local tests (app_plan.md §24).
+const RUNS_LOCALLY = ["localhost", "127.0.0.1"].includes(window.location.hostname);
+
 window.APP_SETTINGS = {
   // Language of the texts (file lang/<language>.json). French, Italian, English follow later.
   language: "de",
@@ -20,17 +26,20 @@ window.APP_SETTINGS = {
   // urban heat island (app_plan.md §13; script 34). null switches the note off.
   urbanNoteThreshold: 50,
 
-  // Usage data (§10 point 5, §10a): nothing is sent while endpoint is null.
+  // Usage data (§10 point 5, §10a, §24): nothing is sent while endpoint is null. On this PC
+  // the events go to the local server, which writes them to output/<run_id>/app_events/.
   events: {
-    endpoint: null
+    endpoint: RUNS_LOCALLY ? "events" : null
   },
 
   // Test hooks for the browser console (window.appDebug); always false for visitors.
   debug: false,
 
-  // Optional survey before and after the game (§10 point 5): switched off until data
-  // protection and ethics are clarified with WSL.
+  // Question box with two click questions below the results map (§24b). Shown everywhere;
+  // while events.endpoint is null (public test site, until data protection and ethics are
+  // clarified) it runs as a test: it says that nothing is stored, and it appears after every
+  // game. false switches it off everywhere.
   survey: {
-    enabled: false
+    enabled: true
   }
 };

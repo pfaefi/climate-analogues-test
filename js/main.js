@@ -6,9 +6,9 @@ import { initStart, refreshStartMap } from "./start.js";
 import { startPlay } from "./play.js";
 import { showResultsScreen } from "./results.js";
 import { showDetailScreen } from "./detail.js";
-import { surveyBeforeGame, surveyAfterGame } from "./survey.js";
+import { showSurveyBox } from "./survey.js";
 import { sendEvent } from "./events.js";
-import { offerLogDownload } from "./memory.js";
+import { offerLogDownload, countGame } from "./memory.js";
 import { initPages } from "./pages.js";
 import { drawBanner } from "./banner.js";
 
@@ -37,21 +37,23 @@ function backToSearch() {
   window.scrollTo(0, search.getBoundingClientRect().top + window.scrollY - band - 12);
 }
 
-// «Spielen»: optional survey question, then the five rounds, then the results.
+// «Spielen»: the five rounds, then the results. The finished game is counted on this device
+// (for the question box, app_plan.md §24b).
 async function startGame(place) {
   currentPlace = place;
-  await surveyBeforeGame(place);
   sendEvent("game_started", { bundle: place.cell.bundle });
   showScreen("play");
-  startPlay(place, async game => {
-    await surveyAfterGame(place);
+  startPlay(place, game => {
+    game.gamesOnDevice = countGame();
     showResults(place, game);
   });
 }
 
 // «Resultate im Detail» and back to the results, scrolled to the button that opened it.
+// The game remembers that the detail screen was opened (sent with the question box answers).
 function showDetail() {
   sendEvent("detail_shown", { bundle: currentPlace.cell.bundle, after_game: currentGame !== null });
+  if (currentGame !== null) currentGame.detailShown = true;
   showScreen("detail");
   showDetailScreen(currentPlace, currentGame);
 }
@@ -62,13 +64,15 @@ function backToResults(event) {
   document.getElementById("detail-button").scrollIntoView({ block: "center" });
 }
 
-// Results screen; game is null when the game was skipped.
+// Results screen; game is null when the game was skipped. The question box below the world
+// map appears only after a played game (and if switched on in settings.js).
 function showResults(place, game = null) {
   currentPlace = place;
   currentGame = game;
   sendEvent("results_shown", { bundle: place.cell.bundle, after_game: game !== null });
   showScreen("results");
   showResultsScreen(place, game);
+  showSurveyBox(place, game);
 }
 
 async function main() {

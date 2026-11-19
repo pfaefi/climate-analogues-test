@@ -115,6 +115,19 @@
     <p class="results-note" data-text="results_tropics"></p>
     <button id="detail-button" class="secondary-button" type="button" data-text="detail_open"></button>
 
+    <!-- Question box: two click questions after a played game (js/survey.js, app_plan.md §24b) -->
+    <div id="survey-box" class="survey-box" hidden>
+      <p class="survey-head"><strong data-text="survey_title"></strong> <span id="survey-step" class="survey-step"></span></p>
+      <p class="survey-info" data-text="survey_info"></p>
+      <p id="survey-test" class="survey-test" data-text="survey_test" hidden></p>
+      <details class="survey-more">
+        <summary data-text="survey_more"></summary>
+        <p data-text="survey_more_text"></p>
+      </details>
+      <p id="survey-question" class="survey-question"></p>
+      <div id="survey-answers" class="survey-answers"></div>
+    </div>
+
     <div id="stripes-box">
       <h2 id="stripes-title"></h2>
       <p class="stripes-subtitle" data-text="stripes_subtitle"></p>
